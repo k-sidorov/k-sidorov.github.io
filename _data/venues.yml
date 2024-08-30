@@ -1,9 +1,7 @@
-"AJP":
-  url: https://aapt.scitation.org/journal/ajp
-  color: "#00369f"
+"CP":
+  url: https://www.a4cp.org/events/cp-conference-series
+  color: "#ffc107"
 
-"PhysRev":
-  url: https://journals.aps.org/
-
-"Vision":
-  color: "#009f36"
+"AAAI":
+  url: https://aaai.org/
+  color: "#0a3bff"

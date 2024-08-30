@@ -4,6 +4,8 @@
 
 // Typography
 
+@import url('https://fonts.googleapis.com/css2?family=Signika+Negative:wght@300..700&display=swap');
+
 p,
 h1,
 h2,
@@ -17,6 +19,11 @@ li,
 span,
 strong {
   color: var(--global-text-color);
+
+  font-family: "Signika Negative", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", "Liberation Sans", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  font-optical-sizing: auto;
+  font-weight: 300;
+  font-style: normal;
 }
 
 hr {
@@ -198,9 +205,9 @@ ul.task-list input[type="checkbox"] {
   .more-info {
     margin-bottom: 5px;
     margin-top: 5px;
-    font-family: monospace;
 
     p {
+      font-family: monospace;
       display: inline-block;
       margin: 0;
     }

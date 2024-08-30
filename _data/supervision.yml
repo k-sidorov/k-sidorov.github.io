@@ -1,0 +1,44 @@
+- topic: "Decision Diagram Focused Learning: Efficient Predict-and-Optimize With Decision Diagrams"
+  name: Jop Schaap
+  post_name: true
+  type: MSc theses
+  start: 28-02-2024
+  year: 2024
+  status: inprogress
+  keywords:
+    - predict-and-Optimize
+    - decision diagrams
+  abstract: >
+    <p><i>Co-supervised with Koos van der Linden</i></p>
+
+    <p>An issue present in many state-of-the-art approaches to predict-and-optimize is the need to re-solve the same problem with different objective coefficients for each gradient computation. In this project, we investigate strategies for predict-and-optimize based on <em>decision diagrams</em> as a representation of a feasible set; since changing the objective values corresponds to re-weighting the diagram, our hypothesis is that we can derive a faster learning routine based on this idea.</p>
+- topic: Combinatorial Optimisation for Scheduling
+  type: BSc theses
+  year: 2023
+  keywords:
+    - scheduling
+    - RCPSP
+    - SAT
+    - VSIDS
+  abstract: >
+    <p>In this project, we have investigated the strategies for guiding a SAT solver into better solution for several variations of <i>resource-constrained
+    project-scheduling problem</i> (RCPSP). A common theme between the subprojects was the importance of the seed values of the VSIDS branching heuristics;
+    despite the common approval of VSIDS as a branching strategy, it has no built-in solution for the cold-start issue. The results of this project suggest
+    several strategies for initializing VSIDS values in a way that triggers a solver into common heuristic solutions.</p>
+
+  subprojects:
+    - title: "Augmenting VSIDS heuristic for the RCPSP/t by initializing activity values using domain-specific information"
+      name: Tijs Lenssen
+      link: https://repository.tudelft.nl/record/uuid:7ed8b13a-316c-4426-a5be-156aa8276449
+    - title: "Integration of variable selection heuristics into a MaxSAT solver for solving the multi-mode resource-constrained project scheduling problem"
+      name: Denis Tsvetkov
+      link: https://repository.tudelft.nl/record/uuid:0c85f1d6-5471-42e7-9794-091ff7b40c40
+    - title: "Combinatorial optimization for job sequencing with one common and multiple secondary resources by using a SAT solver augmented with a domain-specific heuristic"
+      name: Artjom Pugatšov
+      link: https://repository.tudelft.nl/record/uuid:835629e5-57fc-4cd0-ba40-68edb63bf58b
+    - title: "Combining SAT solvers with heuristic ideas for solving RCPSP with logical constraints"
+      name: Iarina Tudor
+      link: https://repository.tudelft.nl/record/uuid:7d74efbc-0f76-409e-bef2-1262d92c3516
+    - title: "Why Midas would be a terrible secretary"
+      name: George Hellouin de Ménibus
+      link: http://resolver.tudelft.nl/uuid:0d5e2fca-247a-4e94-bde4-d39a6818daed
