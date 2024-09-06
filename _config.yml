@@ -315,7 +315,7 @@ scholar:
   last_name: [Sidorov]
   first_name: [Konstantin]
 
-  style: chicago
+  style: chicago-author-date
   locale: en
 
   source: /_bibliography/
