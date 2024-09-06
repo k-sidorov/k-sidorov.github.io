@@ -77,10 +77,10 @@ layout: default
     {% include citation.liquid %}
   {% endif %}
 
-  {% if page.related_publications %}
+  {% if page.bibliography %}
     <h2>References</h2>
     <div class="publications">
-      {% bibliography --cited_in_order %}
+      {% bibliography --cited_in_order --group_by none --file {{ page.bibliography }} %}
     </div>
   {% endif %}
 
