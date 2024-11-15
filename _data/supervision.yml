@@ -6,12 +6,23 @@
   year: 2024
   status: inprogress
   keywords:
-    - predict-and-Optimize
+    - predict-and-optimize
     - decision diagrams
   abstract: >
     <p><i>Co-supervised with Koos van der Linden</i></p>
 
     <p>An issue present in many state-of-the-art approaches to predict-and-optimize is the need to re-solve the same problem with different objective coefficients for each gradient computation. In this project, we investigate strategies for predict-and-optimize based on <em>decision diagrams</em> as a representation of a feasible set; since changing the objective values corresponds to re-weighting the diagram, our hypothesis is that we can derive a faster learning routine based on this idea.</p>
+- topic: "Finding structure in P+O loss functions"
+  name: Thomas Kuiper
+  post_name: true
+  type: MSc theses
+  start: 14-11-2024
+  year: 2024
+  status: inprogress
+  keywords:
+    - predict-and-optimize
+  abstract: >
+    <p>A common trait of loss functions in the predict-and-optimize field is that they give up some information about the problem to make the loss function continuous. To get a better idea of where the strengths and weaknesses lie of P+O losses, we want to find how much of this information on problem structure is retained. In this project, we would like to address the following question: How much of the problem structure do P+O loss functions capture?</p>
 - topic: Combinatorial Optimisation for Scheduling
   type: BSc theses
   year: 2023
