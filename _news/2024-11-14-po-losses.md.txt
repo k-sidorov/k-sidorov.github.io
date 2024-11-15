@@ -1,0 +1,8 @@
+---
+layout: post
+inline: true
+related_posts: false
+title: Thomas Kuiper joins our group
+---
+
+I have started to supervise the project on quantifying the structures captured by the predict-and-optimize loss functions by Thomas Kuiper.
