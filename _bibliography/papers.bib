@@ -45,6 +45,51 @@
   annote =	{Keywords: proof logging, formal verification, constraint programming}
 }
 
+@ARTICLE{Sidorov2024-Other-01,
+  selected={true},
+  abbr={arXiv},
+  title    = "How To Discover Short, Shorter, and the Shortest Proofs of
+              Unsatisfiability: A Branch-and-Bound Approach for Resolution Proof
+              Length Minimization",
+  author   = "Sidorov, Konstantin and van der Linden, Koos and Correia,
+              Gon\c{c}alo Homem de Almeida and de Weerdt, Mathijs and
+              Demirovi\'{c}, Emir",
+  abstract = "Modern software for propositional satisfiability problems gives a
+              powerful automated reasoning toolkit, capable of outputting not
+              only a satisfiable/unsatisfiable signal but also a justification
+              of unsatisfiability in the form of resolution proof (or a more
+              expressive proof), which is commonly used for verification
+              purposes. Empirically, modern SAT solvers produce relatively short
+              proofs, however, there are no inherent guarantees that these
+              proofs cannot be significantly reduced. This paper proposes a
+              novel branch-and-bound algorithm for finding the shortest
+              resolution proofs; to this end, we introduce a layer list
+              representation of proofs that groups clauses by their level of
+              indirection. As we show, this representation breaks all
+              permutational symmetries, thereby improving upon the
+              state-of-the-art symmetry-breaking and informing the design of a
+              novel workflow for proof minimization. In addition to that, we
+              design pruning procedures that reason on proof length lower bound,
+              clause subsumption, and dominance. Our experiments suggest that
+              the proofs from state-of-the-art solvers could be shortened by
+              30-60\% on the instances from SAT Competition 2002 and by 25-50\%
+              on small synthetic formulas. When treated as an algorithm for
+              finding the shortest proof, our approach solves twice as many
+              instances as the previous work based on SAT solving and reduces
+              the time to optimality by orders of magnitude for the instances
+              solved by both approaches.",
+  month    =  "12~" # nov,
+  year     =  2024,
+  keywords = "Proof minimization;Branch-and-bound;Symmetry breaking;Dominance
+              pruning;MUS;Propositional satisfiability",
+  html = {https://arxiv.org/abs/2411.07955},
+  pdf = {https://arxiv.org/pdf/2411.07955},
+  poster = {Proof minimization CP24.pdf},
+  code = {https://zenodo.org/records/14051922},
+  dataset = {https://zenodo.org/records/14052283}
+}
+
+
 @article{Sidorov_Correia_deWeerdt_Demirović_2024,
   selected={true},
   abbr={AAAI},
@@ -66,3 +111,4 @@
   code = {https://zenodo.org/records/10402563},
   dataset = {https://zenodo.org/records/10402259}
 }
+
