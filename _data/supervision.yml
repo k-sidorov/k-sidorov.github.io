@@ -4,7 +4,8 @@
   type: MSc theses
   start: 28-02-2024
   year: 2024
-  status: inprogress
+  status: finished
+  link: https://repository.tudelft.nl/record/uuid:36f6961f-4494-43ad-be11-f120ffced3db
   keywords:
     - predict-and-optimize
     - decision diagrams
