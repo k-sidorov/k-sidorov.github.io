@@ -67,7 +67,11 @@ In a word: **yes**!
 
 When we tested our approach on the 3n puzzle that stumped other solvers, ours solved it instantly, and for much larger versions at that. More importantly, when we applied it to well-known, difficult scheduling benchmarks from the research community, we saw some major improvements. On problems with high _resource contention_—meaning resources are scarce and tasks are constantly competing—our approach sometimes improved the solver's speed by **orders of magnitude**. (That means instead of taking hours, it took minutes or even seconds!)
 
-We were also thrilled to discover **new state-of-the-art bounds** for a handful of problems that have been studied by researchers for years. We improved the best-known solutions for 16 RCPSP/max and 4 RCPSP instances and completely solved seven of them that were previously open along the way. For us, it's like finding a new, faster route through a well-trodden maze.
+We were also thrilled to discover **new state-of-the-art bounds** for a handful of problems that have been studied by researchers for years. We managed to:
+- discover the best-known solutions for two RCPSP/max and four RCPSP instances,
+- improve the lower bounds on the achievable objective value for sixteen RCPSP/max and four RCPSP instances,
+- and completely solve seven instances that were previously open along the way.
+For us, it's like finding a new, faster route through a well-trodden maze.
 
 ## The takeaways
 
