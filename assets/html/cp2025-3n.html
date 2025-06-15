@@ -159,6 +159,15 @@
                 const rect = draggedElement.getBoundingClientRect();
                 offsetX = e.clientX - rect.left;
                 offsetY = e.clientY - rect.top;
+
+                const data = JSON.parse(draggedElement.dataset.taskData);
+                const resources = data.resources;
+                taskInfoContent.innerHTML = `
+                    <p class="font-bold text-indigo-700">${data.name}</p>
+                    <p>Resource 1: ${resources.res1}%</p>
+                    <p>Resource 2: ${resources.res2}%</p>
+                    <p>Resource 3: ${resources.res3}%</p>
+                `;
             }
         });
 
