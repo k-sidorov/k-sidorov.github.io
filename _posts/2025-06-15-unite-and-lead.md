@@ -71,6 +71,7 @@ We were also thrilled to discover **new state-of-the-art bounds** for a handful 
 - discover the best-known solutions for two RCPSP/max and four RCPSP instances,
 - improve the lower bounds on the achievable objective value for sixteen RCPSP/max and four RCPSP instances,
 - and completely solve seven instances that were previously open along the way.
+
 For us, it's like finding a new, faster route through a well-trodden maze.
 
 ## The takeaways
