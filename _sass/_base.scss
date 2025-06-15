@@ -13,11 +13,9 @@ h3,
 h4,
 h5,
 h6,
-em,
 div,
 li,
-span,
-strong {
+span {
   color: var(--global-text-color);
 
   font-family: "Signika Negative", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", "Liberation Sans", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
@@ -1310,4 +1308,9 @@ ninja-keys::part(ninja-input-wrapper) {
 ::highlight(search) {
   background-color: var(--global-theme-color);
   color: var(--global-text-color);
+}
+
+iframe {
+  width: 100%;
+  height: 100vh;
 }

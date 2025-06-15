@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3n Problem Visualization</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Signika+Negative:wght@300..700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Signika Negative', sans-serif;
+            font-weight: 200;
+            user-select: none;
+        }
+        .task {
+            touch-action: none;
+            cursor: grab;
+            height: 40px;
+            border: 2px solid rgba(0,0,0,0.2);
+            transition: box-shadow 0.2s ease-in-out, top 0.2s ease-in-out, left 0.2s ease-in-out, border-color 0.2s ease-in-out;
+            box-sizing: border-box;
+        }
+        .task.selected {
+            border-color: #4f46e5; /* Indigo-600 */
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.4);
+        }
+        /* Style for tasks in the pool */
+        #task-pool .task {
+             position: relative;
+        }
+        /* Style for tasks being dragged or on the timeline */
+        .task.dragging, #timeline .task {
+             position: absolute;
+        }
+        .task.dragging {
+            cursor: grabbing;
+            z-index: 1000;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2), 0 4px 6px -2px rgba(0, 0, 0, 0.1);
+            /* FIX: Override the transition to remove lag. Only the shadow is animated now. */
+            transition: box-shadow 0.2s ease-in-out;
+        }
+        .resource-bar-container {
+            position: relative;
+            height: 20px;
+            background-color: #e5e7eb;
+            border-radius: 0.375rem;
+            overflow: hidden;
+        }
+        .resource-bar {
+            position: absolute;
+            height: 100%;
+            transition: width 0.1s linear;
+        }
+        /* FIX: Make timeline container scrollable and give timeline a min-width */
+        #timeline-container {
+            overflow-x: auto;
+        }
+        #timeline {
+            background-image:
+                linear-gradient(to right, #d1d5db 1px, transparent 1px);
+            background-size: 100px 100%;
+            min-width: 1000px; /* Ensure there's enough space to scroll into */
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 flex flex-col items-center justify-center min-h-screen p-4">
+
+    <div class="w-full max-w-6xl mx-auto bg-white p-6 rounded-xl shadow-lg">
+        <div class="text-center mb-4">
+            <h2 class="text-xl font-bold">The 3n Scheduling Puzzle</h2>
+            <p class="text-sm text-gray-600">Drag tasks to the timeline. Tap a task to see its info. Can any two overlap?</p>
+        </div>
+
+        <!-- Task Pool -->
+        <div id="task-pool" class="relative grid grid-cols-3 md:grid-cols-6 gap-4 p-4 border-2 border-dashed rounded-lg bg-gray-100 mb-6 min-h-[100px]">
+             <!-- Tasks will be dynamically generated here -->
+        </div>
+
+        <!-- Timeline and Resources -->
+        <div class="flex flex-col space-y-4">
+            <!-- Updated timeline container to be taller and scrollable -->
+            <div id="timeline-container" class="w-full h-[150px] bg-gray-200 rounded-lg relative">
+                <div id="timeline" class="w-full h-full relative">
+                     <!-- Placed tasks will go here -->
+                </div>
+            </div>
+            <div id="resource-usage" class="w-full p-4 border rounded-lg bg-gray-100 flex flex-col md:flex-row gap-4">
+                <div class="flex-grow">
+                    <h3 class="font-semibold mb-3 text-center">Resource usage (max. capacity: 100%)</h3>
+                    <div class="space-y-2">
+                        <div>
+                            <span class="text-sm font-medium">Resource 1 (yellow and green tasks)</span>
+                            <div class="resource-bar-container"><div id="res1-bar" class="resource-bar bg-yellow-400"></div></div>
+                        </div>
+                        <div>
+                            <span class="text-sm font-medium">Resource 2 (yellow and blue tasks)</span>
+                            <div class="resource-bar-container"><div id="res2-bar" class="resource-bar bg-blue-400"></div></div>
+                        </div>
+                         <div>
+                            <span class="text-sm font-medium">Resource 3 (green and blue tasks)</span>
+                            <div class="resource-bar-container"><div id="res3-bar" class="resource-bar bg-green-400"></div></div>
+                        </div>
+                    </div>
+                     <div id="conflict-message" class="text-center text-red-600 font-bold mt-3 h-5"></div>
+                </div>
+                <div id="task-info-panel" class="w-full md:w-56 flex-shrink-0 bg-gray-200 p-3 rounded-md">
+                    <h4 class="font-semibold text-center text-gray-700">Task info</h4>
+                    <div id="task-info-content" class="text-sm text-gray-600 mt-2 text-center">Tap a task to see details.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const tasksData = [
+            { id: 0, group: 'yellow', resources: { res1: 70, res2: 40, res3: 0 } },
+            { id: 1, group: 'yellow', resources: { res1: 70, res2: 40, res3: 0 } },
+            { id: 2, group: 'green', resources: { res1: 40, res2: 0, res3: 70 } },
+            { id: 3, group: 'green', resources: { res1: 40, res2: 0, res3: 70 } },
+            { id: 4, group: 'blue', resources: { res1: 0, res2: 70, res3: 40 } },
+            { id: 5, group: 'blue', resources: { res1: 0, res2: 70, res3: 40 } },
+        ].map((t, i) => ({...t, id: `task-${t.id}`, name: `Task ${i + 1}`}));
+
+        const taskPool = document.getElementById('task-pool');
+        const timeline = document.getElementById('timeline');
+        const timelineContainer = document.getElementById('timeline-container');
+        const taskInfoContent = document.getElementById('task-info-content');
+
+        const TASK_WIDTH = 100;
+        const TASK_HEIGHT = 40;
+        let selectedTask = null;
+
+        // Initialize tasks in the pool
+        tasksData.forEach((data) => {
+            const taskElement = document.createElement('div');
+            taskElement.id = data.id;
+            taskElement.className = `task w-[100px] flex items-center justify-center rounded-lg font-normal`;
+            taskElement.textContent = data.name;
+
+            if(data.group === 'yellow') taskElement.classList.add('bg-yellow-200', 'border-yellow-400');
+            if(data.group === 'green') taskElement.classList.add('bg-green-200', 'border-green-400');
+            if(data.group === 'blue') taskElement.classList.add('bg-blue-200', 'border-blue-400');
+
+            taskElement.dataset.taskData = JSON.stringify(data);
+            taskPool.appendChild(taskElement);
+        });
+
+        let draggedElement = null;
+        let offsetX, offsetY;
+        let isDragging = false;
+        let pointerDownTime = 0;
+
+        document.addEventListener('pointerdown', function (e) {
+            if (e.target.classList.contains('task')) {
+                draggedElement = e.target;
+                isDragging = false; // Reset dragging state
+                pointerDownTime = Date.now();
+
+                const rect = draggedElement.getBoundingClientRect();
+                offsetX = e.clientX - rect.left;
+                offsetY = e.clientY - rect.top;
+            }
+        });
+
+        document.addEventListener('pointermove', function (e) {
+            if (draggedElement) {
+                // If the pointer moves more than a few pixels, we consider it a drag
+                if (!isDragging) {
+                    isDragging = true;
+                    // Start the visual drag
+                    draggedElement.classList.add('dragging');
+                    if (draggedElement.parentElement !== document.body) {
+                        document.body.appendChild(draggedElement);
+                    }
+                    draggedElement.style.left = `${e.clientX - offsetX}px`;
+                    draggedElement.style.top = `${e.clientY - offsetY}px`;
+                }
+
+                // Continue moving if it is a drag
+                e.preventDefault();
+                draggedElement.style.left = `${e.clientX - offsetX}px`;
+                draggedElement.style.top = `${e.clientY - offsetY}px`;
+            }
+        });
+
+        document.addEventListener('pointerup', function (e) {
+            if (draggedElement) {
+                if (isDragging) {
+                    const timelineRect = timelineContainer.getBoundingClientRect();
+                    const dropX = e.clientX + timelineContainer.scrollLeft;
+                    const dropY = e.clientY;
+
+                    if (e.clientX >= timelineRect.left && e.clientX <= timelineRect.right &&
+                        e.clientY >= timelineRect.top && e.clientY <= timelineRect.bottom) {
+
+                        const relativeX = dropX - timelineRect.left - offsetX;
+                        const snappedX = Math.round(relativeX / TASK_WIDTH) * TASK_WIDTH;
+
+                        const tasksInSameSlot = Array.from(timeline.children)
+                            .filter(child => child.classList.contains('task') && Math.round(parseFloat(child.style.left)) === snappedX);
+
+                        const laneYPositions = [10, 80];
+                        const occupiedLanesY = tasksInSameSlot.map(t => parseFloat(t.style.top));
+                        const targetY = laneYPositions.find(y => !occupiedLanesY.includes(y));
+
+                        if (targetY !== undefined) {
+                            timeline.appendChild(draggedElement);
+                            draggedElement.style.left = `${Math.max(0, snappedX)}px`;
+                            draggedElement.style.top = `${targetY}px`;
+                        } else {
+                            returnToPool(draggedElement);
+                        }
+                    } else {
+                        returnToPool(draggedElement);
+                    }
+                    draggedElement.classList.remove('dragging');
+                } else {
+                    handleTaskTap(e.target);
+                }
+                draggedElement = null;
+                updateResourceUsage();
+            }
+        });
+
+        function returnToPool(element) {
+            taskPool.appendChild(element);
+            element.style.position = 'relative';
+            element.style.left = '';
+            element.style.top = '';
+        }
+
+        function handleTaskTap(taskElement) {
+            // Unselect previous task
+            if (selectedTask) {
+                selectedTask.classList.remove('selected');
+            }
+            // If tapping the same task, unselect it. Otherwise, select the new one.
+            if (selectedTask === taskElement) {
+                selectedTask = null;
+                taskInfoContent.innerHTML = 'Tap a task to see details.';
+            } else {
+                selectedTask = taskElement;
+                selectedTask.classList.add('selected');
+                const data = JSON.parse(taskElement.dataset.taskData);
+                const resources = data.resources;
+                taskInfoContent.innerHTML = `
+                    <p class="font-bold text-indigo-700">${data.name}</p>
+                    <p>Resource 1: ${resources.res1}%</p>
+                    <p>Resource 2: ${resources.res2}%</p>
+                    <p>Resource 3: ${resources.res3}%</p>
+                `;
+            }
+        }
+
+        function updateResourceUsage() {
+            const timeSlots = {};
+            const placedTasks = Array.from(timeline.children).filter(child => child.classList.contains('task'));
+
+            placedTasks.forEach(task => {
+                const startSlot = Math.round(parseFloat(task.style.left) / TASK_WIDTH);
+                const data = JSON.parse(task.dataset.taskData);
+                const resources = data.resources;
+
+                if (!timeSlots[startSlot]) {
+                    timeSlots[startSlot] = { res1: 0, res2: 0, res3: 0 };
+                }
+                timeSlots[startSlot].res1 += resources.res1;
+                timeSlots[startSlot].res2 += resources.res2;
+                timeSlots[startSlot].res3 += resources.res3;
+            });
+
+            let maxRes1 = 0, maxRes2 = 0, maxRes3 = 0;
+
+            for (const slot in timeSlots) {
+                maxRes1 = Math.max(maxRes1, timeSlots[slot].res1);
+                maxRes2 = Math.max(maxRes2, timeSlots[slot].res2);
+                maxRes3 = Math.max(maxRes3, timeSlots[slot].res3);
+            }
+
+            document.getElementById('res1-bar').style.width = `${Math.min(maxRes1, 150)}%`;
+            document.getElementById('res2-bar').style.width = `${Math.min(maxRes2, 150)}%`;
+            document.getElementById('res3-bar').style.width = `${Math.min(maxRes3, 150)}%`;
+
+            const conflictMsg = document.getElementById('conflict-message');
+            const hasConflict = maxRes1 > 100 || maxRes2 > 100 || maxRes3 > 100;
+
+            conflictMsg.textContent = hasConflict ? 'Conflict! Resource capacity exceeded.' : '';
+            document.getElementById('res1-bar').classList.toggle('bg-red-500', maxRes1 > 100);
+            document.getElementById('res2-bar').classList.toggle('bg-red-500', maxRes2 > 100);
+            document.getElementById('res3-bar').classList.toggle('bg-red-500', maxRes3 > 100);
+        }
+    });
+    </script>
+</body>
+</html>
