@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conflict Graph Visualization</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Signika+Negative:wght@300..700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Signika Negative', sans-serif;
+        }
+        .graph-container {
+            width: 100%;
+            height: 450px;
+            background-color: #f9fafb;
+            border-radius: 0.75rem;
+            border: 1px solid #d1d5db;
+        }
+        .node {
+            cursor: pointer;
+        }
+        .node circle {
+            stroke-width: 2px;
+            transition: fill 0.3s ease;
+        }
+        .node text {
+            pointer-events: none;
+            font-size: 12px;
+            font-weight: 400;
+            fill: #fff;
+        }
+        .link {
+            stroke: #9ca3af;
+            stroke-opacity: 0.6;
+            stroke-width: 2px;
+            transition: stroke 0.3s ease, stroke-width 0.3s ease;
+        }
+        .link.conflict {
+            stroke: #ef4444;
+            stroke-opacity: 1;
+            stroke-width: 4px;
+        }
+        .node.conflict circle {
+            fill: #fecaca;
+            stroke: #ef4444;
+        }
+        .node.conflict text {
+            fill: #000;
+        }
+        .controls label {
+            cursor: pointer;
+        }
+        #message-box {
+            transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 flex items-center justify-center min-h-screen p-4">
+
+    <div class="w-full max-w-4xl mx-auto bg-white p-6 rounded-xl shadow-lg">
+        <div class="text-center mb-4">
+            <h2 class="text-xl font-bold">The Disjointness Detective</h2>
+            <p class="text-sm text-gray-600">Enable constraints to see how disjointness relations form a conflict.</p>
+        </div>
+
+        <div class="flex flex-col md:flex-row gap-6">
+            <div class="graph-container flex-grow" id="graph-viz"></div>
+            <div class="flex-shrink-0 w-full md:w-56">
+                <div class="controls bg-gray-100 p-4 rounded-lg border">
+                    <h3 class="font-semibold mb-3 text-center">Constraints</h3>
+                    <div class="space-y-3" id="controls">
+                        <!-- Checkboxes will be inserted here -->
+                    </div>
+                </div>
+                <div id="message-box" class="mt-4 p-4 rounded-lg text-center font-semibold opacity-0 transform scale-95">
+                    <!-- Message will appear here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const nodes = [
+            { id: 0, name: "0..2", group: 1 }, { id: 1, name: "1..6", group: 1 },
+            { id: 2, name: "0..2", group: 2 }, { id: 3, name: "1..6", group: 2 },
+            { id: 4, name: "0..2", group: 3 }, { id: 5, name: "1..6", group: 3 }
+        ];
+
+        // Define edges based on which constraint creates them
+        const allLinks = [
+            // Constraint 1 (Yellow-Yellow, Yellow-Green)
+            { source: 0, target: 1, constraint: 1 }, { source: 0, target: 2, constraint: 1 },
+            { source: 0, target: 3, constraint: 1 }, { source: 1, target: 2, constraint: 1 },
+            { source: 1, target: 3, constraint: 1 },
+            // Constraint 2 (Blue-Blue, Yellow-Blue)
+            { source: 4, target: 5, constraint: 2 }, { source: 0, target: 4, constraint: 2 },
+            { source: 0, target: 5, constraint: 2 }, { source: 1, target: 4, constraint: 2 },
+            { source: 1, target: 5, constraint: 2 },
+             // Constraint 3 (Green-Green, Green-Blue)
+            { source: 2, target: 3, constraint: 3 }, { source: 2, target: 4, constraint: 3 },
+            { source: 2, target: 5, constraint: 3 }, { source: 3, target: 4, constraint: 3 },
+            { source: 3, target: 5, constraint: 3 },
+        ];
+
+        const constraints = [
+            { id: 1, name: "Resource 1", clique: [0, 1, 2, 3] },
+            { id: 2, name: "Resource 2", clique: [0, 1, 4, 5] },
+            { id: 3, name: "Resource 3", clique: [2, 3, 4, 5] },
+        ];
+
+        const cliqueToFind = [0, 2, 4]; // The clique we are looking for T1, T3, T5
+
+        const controlsContainer = document.getElementById('controls');
+        constraints.forEach(c => {
+            controlsContainer.innerHTML += `
+                <div class="flex items-center">
+                    <input type="checkbox" id="constraint-${c.id}" data-constraint="${c.id}" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
+                    <label for="constraint-${c.id}" class="ml-2 block text-sm text-gray-900">${c.name}</label>
+                </div>
+            `;
+        });
+
+        const container = document.getElementById('graph-viz');
+        const width = container.clientWidth;
+        const height = container.clientHeight;
+
+        const svg = d3.select("#graph-viz").append("svg")
+            .attr("width", width)
+            .attr("height", height);
+
+        const color = d3.scaleOrdinal(d3.schemeCategory10);
+
+        const simulation = d3.forceSimulation(nodes)
+            .force("link", d3.forceLink().id(d => d.id).distance(100))
+            .force("charge", d3.forceManyBody().strength(-400))
+            .force("center", d3.forceCenter(width / 2, height / 2));
+
+        let link = svg.append("g").selectAll(".link");
+        let node = svg.append("g").selectAll(".node");
+
+        function updateGraph() {
+            const activeConstraints = new Set();
+            d3.selectAll("input[type=checkbox]:checked").each(function() {
+                activeConstraints.add(+this.dataset.constraint);
+            });
+
+            const activeLinks = allLinks.filter(l => activeConstraints.has(l.constraint));
+
+            // Update links
+            link = link.data(activeLinks, d => `${d.source.id}-${d.target.id}`);
+            link.exit().remove();
+            link = link.enter().append("line")
+                .attr("class", "link")
+                .merge(link);
+
+            // Update nodes
+            node = node.data(nodes, d => d.id);
+            node.exit().remove();
+            const nodeEnter = node.enter().append("g").attr("class", "node");
+            nodeEnter.append("circle")
+                .attr("r", 20)
+                .attr("fill", d => color(d.group))
+                .attr("stroke", d => pSBC(-0.33, color(d.group)));
+            nodeEnter.append("text")
+                .attr("dy", ".35em")
+                .attr("text-anchor", "middle")
+                .text(d => d.name);
+            node = nodeEnter.merge(node);
+
+            simulation.nodes(nodes);
+            simulation.force("link").links(activeLinks);
+            simulation.alpha(0.10).restart();
+
+            checkForClique();
+        }
+
+        simulation.on("tick", () => {
+            link
+                .attr("x1", d => d.source.x)
+                .attr("y1", d => d.source.y)
+                .attr("x2", d => d.target.x)
+                .attr("y2", d => d.target.y);
+            node
+                .attr("transform", d => `translate(${d.x},${d.y})`);
+        });
+
+        function checkForClique() {
+            const adj = new Map(nodes.map(n => [n.id, new Set()]));
+            link.each(function(d) {
+                adj.get(d.source.id).add(d.target.id);
+                adj.get(d.target.id).add(d.source.id);
+            });
+
+            let isCliqueFound = cliqueToFind.every(u =>
+                cliqueToFind.every(v => u === v || adj.get(u).has(v))
+            );
+
+            const messageBox = document.getElementById('message-box');
+            if (isCliqueFound) {
+                node.classed("conflict", d => cliqueToFind.includes(d.id));
+                link.classed("conflict", d => cliqueToFind.includes(d.source.id) && cliqueToFind.includes(d.target.id));
+
+                messageBox.textContent = "Conflict found! 2 units of time for 3 tasks";
+                messageBox.className = "mt-4 p-4 rounded-lg text-center font-semibold bg-red-100 text-red-700 opacity-100 transform scale-100";
+            } else {
+                node.classed("conflict", false);
+                link.classed("conflict", false);
+                messageBox.textContent = "No conflict yet...";
+                 messageBox.className = "mt-4 p-4 rounded-lg text-center font-semibold bg-blue-100 text-blue-700 opacity-100 transform scale-100";
+            }
+        }
+
+        d3.selectAll("input[type=checkbox]").on("change", updateGraph);
+        updateGraph();
+
+        // Initial message
+        document.getElementById('message-box').textContent = "No conflict yet...";
+        document.getElementById('message-box').className = "mt-4 p-4 rounded-lg text-center font-semibold bg-gray-200 text-gray-700 opacity-100 transform scale-100";
+    });// Version 4.0
+
+    // https://stackoverflow.com/a/13542669
+      const pSBC=(p,c0,c1,l)=>{
+          let r,g,b,P,f,t,h,i=parseInt,m=Math.round,a=typeof(c1)=="string";
+          if(typeof(p)!="number"||p<-1||p>1||typeof(c0)!="string"||(c0[0]!='r'&&c0[0]!='#')||(c1&&!a))return null;
+          if(!this.pSBCr)this.pSBCr=(d)=>{
+              let n=d.length,x={};
+              if(n>9){
+                  [r,g,b,a]=d=d.split(","),n=d.length;
+                  if(n<3||n>4)return null;
+                  x.r=i(r[3]=="a"?r.slice(5):r.slice(4)),x.g=i(g),x.b=i(b),x.a=a?parseFloat(a):-1
+              }else{
+                  if(n==8||n==6||n<4)return null;
+                  if(n<6)d="#"+d[1]+d[1]+d[2]+d[2]+d[3]+d[3]+(n>4?d[4]+d[4]:"");
+                  d=i(d.slice(1),16);
+                  if(n==9||n==5)x.r=d>>24&255,x.g=d>>16&255,x.b=d>>8&255,x.a=m((d&255)/0.255)/1000;
+                  else x.r=d>>16,x.g=d>>8&255,x.b=d&255,x.a=-1
+              }return x};
+          h=c0.length>9,h=a?c1.length>9?true:c1=="c"?!h:false:h,f=this.pSBCr(c0),P=p<0,t=c1&&c1!="c"?this.pSBCr(c1):P?{r:0,g:0,b:0,a:-1}:{r:255,g:255,b:255,a:-1},p=P?p*-1:p,P=1-p;
+          if(!f||!t)return null;
+          if(l)r=m(P*f.r+p*t.r),g=m(P*f.g+p*t.g),b=m(P*f.b+p*t.b);
+          else r=m((P*f.r**2+p*t.r**2)**0.5),g=m((P*f.g**2+p*t.g**2)**0.5),b=m((P*f.b**2+p*t.b**2)**0.5);
+          a=f.a,t=t.a,f=a>=0||t>=0,a=f?a<0?t:t<0?a:a*P+t*p:0;
+          if(h)return"rgb"+(f?"a(":"(")+r+","+g+","+b+(f?","+m(a*1000)/1000:"")+")";
+          else return"#"+(4294967296+r*16777216+g*65536+b*256+(f?m(a*255):0)).toString(16).slice(1,f?undefined:-2)
+      }
+    </script>
+</body>
+</html>
