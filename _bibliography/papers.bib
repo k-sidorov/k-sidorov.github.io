@@ -1,5 +1,27 @@
----
----
+@InProceedings{sidorov_et_al:LIPIcs.CP.2025.35,
+  abbr={CP},
+  author =	{Sidorov, Konstantin and Marijnissen, Imko and Demirovi\'{c}, Emir},
+  title =	{{Unite and Lead: Finding Disjunctive Cliques for Scheduling Problems}},
+  booktitle =	{31st International Conference on Principles and Practice of Constraint Programming (CP 2025)},
+  pages =	{35:1--35:24},
+  series =	{Leibniz International Proceedings in Informatics (LIPIcs)},
+  ISBN =	{978-3-95977-380-5},
+  ISSN =	{1868-8969},
+  year =	{2025},
+  volume =	{340},
+  editor =	{de la Banda, Maria Garcia},
+  publisher =	{Schloss Dagstuhl -- Leibniz-Zentrum f{\"u}r Informatik},
+  address =	{Dagstuhl, Germany},
+  URL =		{https://drops.dagstuhl.de/entities/document/10.4230/LIPIcs.CP.2025.35},
+  html =		{https://drops.dagstuhl.de/entities/document/10.4230/LIPIcs.CP.2025.35},
+  URN =		{urn:nbn:de:0030-drops-238969},
+  doi =		{10.4230/LIPIcs.CP.2025.35},
+  annote =	{Keywords: Constraint Programming, Lazy Clause Generation, Propagation, Scheduling, Cumulative, Disjunctive},
+  abstract = {Constraint programming solvers have seen much success in scheduling problems owing to their efficient reasoning over constraints to solve complex problems in practice. Many algorithms have been proposed for propagating information from a single constraint. However, inferring and exchanging information across multiple constraints can provide deeper insight into the global structure of a problem. In this work, we propose to exchange information amongst constraints by inferring the disjointness of tasks in scheduling problems from many constraints. We do this by (i) augmenting existing propagators, such as the Cumulative and nogoods, to report when pairs of tasks are disjoint, and (ii) leveraging this information by introducing the SelectiveDisjunctive propagator which generates a lower bound on the earliest completion time of cliques of disjoint tasks to determine conflicts. This allows us to aggregate disjointness information spanning multiple constraints to gain a better global overview of the problem, as well as more precise local information. We also identify a problem structure where an LCG solver reasoning over Cumulative constraints separately, without any reformulations, requires an exponential amount of time to prove infeasibility, which we both justify theoretically and show empirically; on the other hand, our approach solves those instances in polynomial time. On particular known RCPSP and RCPSP/max benchmarks, our approach significantly reduces the number of conflicts required to prove optimality when resource contention is high. Additionally, we discover new lower bounds for 16 RCPSP/max instances (closing six of them) and four RCPSP instances (closing one), as well as new upper bounds for two RCPSP/max instances and four RCPSP instances. Furthermore, we empirically analyse our proposed approach to determine which features are beneficial for performance, showing that finding cliques is one of the main bottlenecks and that detecting disjointness during search can lead to improved bounds on certain instances, but it generally negatively impacts learning. This work paves the way for reasoning over the disjointness of tasks inferred from a variety of standard constraints to discover novel information sourced from multiple constraints during search.},
+  pdf = {cp2025-unite-and-lead.pdf},
+  code = {https://zenodo.org/records/15624366},
+  dataset = {https://zenodo.org/records/15624416}
+}
 
 @InProceedings{demirovic_et_al:LIPIcs.CP.2024.9,
   abbr={CP},

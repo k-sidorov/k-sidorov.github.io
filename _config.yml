@@ -41,7 +41,6 @@ repo_trophies:
 rss_icon: true
 feed:
   collections:
-    - posts
     - news
 
 # -----------------------------------------------------------------------------

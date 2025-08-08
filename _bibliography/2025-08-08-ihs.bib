@@ -1,0 +1,112 @@
+@InProceedings{10.1007/978-3-642-23786-7_19,
+author="Davies, Jessica
+and Bacchus, Fahiem",
+html="https://link.springer.com/chapter/10.1007/978-3-642-23786-7_19",
+editor="Lee, Jimmy",
+title="Solving MAXSAT by Solving a Sequence of Simpler SAT Instances",
+booktitle="Principles and Practice of Constraint Programming -- CP 2011",
+year="2011",
+publisher="Springer Berlin Heidelberg",
+address="Berlin, Heidelberg",
+pages="225--239",
+abstract="Maxsat is an optimization version of Satisfiability aimed at finding a truth assignment that maximizes the satisfaction of the theory. The technique of solving a sequence of SAT decision problems has been quite successful for solving larger, more industrially focused Maxsat instances, particularly when only a small number of clauses need to be falsified. The SAT decision problems, however, become more and more complicated as the minimal number of clauses that must be falsified increases. This can significantly degrade the performance of the approach. This technique also has more difficulty with the important generalization where each clause is given a weight: the weights generate SAT decision problems that are harder for SAT solvers to solve. In this paper we introduce a new Maxsat algorithm that avoids these problems. Our algorithm also solves a sequence of SAT instances. However, these SAT instances are always simplifications of the initial Maxsat formula, and thus are relatively easy for modern SAT solvers. This is accomplished by moving all of the arithmetic reasoning into a separate hitting set problem which can then be solved with techniques better suited to numeric reasoning, e.g., techniques from mathematical programming. As a result the performance of our algorithm is unaffected by the addition of clause weights. Our algorithm can, however, require solving more SAT instances than previous approaches. Nevertheless, the approach is simpler than previous methods and displays superior performance on some benchmarks.",
+isbn="978-3-642-23786-7"
+}
+
+@InProceedings{10.1007/978-3-319-23219-5_13,
+author="Ignatiev, Alexey
+and Previti, Alessandro
+and Liffiton, Mark
+and Marques-Silva, Joao",
+html="https://link.springer.com/chapter/10.1007/978-3-319-23219-5_13",
+pdf="https://alexeyignatiev.github.io/assets/pdf/iplms-cp15-preprint.pdf",
+editor="Pesant, Gilles",
+title="Smallest MUS Extraction with Minimal Hitting Set Dualization",
+booktitle="Principles and Practice of Constraint Programming",
+year="2015",
+publisher="Springer International Publishing",
+address="Cham",
+pages="173--182",
+abstract="Minimal explanations of infeasibility are of great interest in many domains. In propositional logic, these are referred to as Minimal Unsatisfiable Subsets (MUSes). An unsatisfiable formula can have multiple MUSes, some of which provide more insights than others. Different criteria can be considered in order to identify a good minimal explanation. Among these, the size of an MUS is arguably one of the most intuitive. Moreover, computing the smallest MUS (SMUS) finds several practical applications that include validating the quality of the MUSes computed by MUS extractors and finding equivalent subformulae of smallest size, among others. This paper develops a novel algorithm for computing a smallest MUS, and we show that it outperforms all the previous alternatives pushing the state of the art in SMUS solving. Although described in the context of propositional logic, the presented technique can also be applied to other constraint systems.",
+isbn="978-3-319-23219-5"
+}
+
+@article{MANNILA199483,
+title = {Algorithms for inferring functional dependencies from relations},
+journal = {Data & Knowledge Engineering},
+volume = {12},
+number = {1},
+pages = {83-99},
+year = {1994},
+issn = {0169-023X},
+doi = {https://doi.org/10.1016/0169-023X(94)90023-X},
+url = {https://www.sciencedirect.com/science/article/pii/0169023X9490023X},
+html = {https://www.sciencedirect.com/science/article/pii/0169023X9490023X},
+author = {Heikki Mannila and Kari-Jouko Räihä},
+keywords = {Functional dependencies, machine discovery, data mining, algorithms},
+abstract = {The dependency inference problem is to find a cover of the set of functional dependencies that hold in a given relation. The problem has applications in relational database design, in query optimization, and in artificial intelligence. The problem is exponential in the number of attributes. We develop two algorithms with better best case behavior than the simple one. One algorithm reduces the problem to computing the transversal of a hypergraph. The other is based on repeatedly sorting the relation with respect to a set of attributes.}
+}
+
+@article{10.1145/146931.146932,
+author = {Siegel, Michael and Sciore, Edward and Salveter, Sharon},
+title = {A method for automatic rule derivation to support semantic query optimization},
+year = {1992},
+issue_date = {Dec. 1992},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+volume = {17},
+number = {4},
+issn = {0362-5915},
+url = {https://doi.org/10.1145/146931.146932},
+html = {https://doi.org/10.1145/146931.146932},
+doi = {10.1145/146931.146932},
+abstract = {The use of inference rules to support intelligent data processing is an increasingly important tool in many areas of computer science. In database systems, rules are used in semantic query optimization as a method for reducing query processing costs. The savings is dependent on the ability of experts to supply a set of useful rules and the ability of the optimizer to quickly find the appropriate transformations generated by these rules. Unfortunately, the most useful rules are not always those that would or could be specified by an expert. This paper describes the architecture of a system having two interrelated components: a combined conventional/semantic query optimizer, and an automatic rule deriver.Our automatic rule derivation method uses intermediate results from   the optimization process to direct the search for learning new rules. Unlike a system employing only user-specified rules, a system with an automatic capability can derive rules that may be true only in the current state of the database and can modify the rule set to reflect changes in the database and its usage pattern.This system has been implemented as an extension of the EXODUS conventional query optimizer generator. We describe the implementation, and show how semantic query optimization is an extension of conventional optimization in this context.},
+journal = {ACM Trans. Database Syst.},
+month = dec,
+pages = {563–600},
+numpages = {38},
+keywords = {integrity constraint, learning, transformation heuristic}
+}
+
+@misc{staus2024wittyefficientsolvercomputing,
+      title={Witty: An Efficient Solver for Computing Minimum-Size Decision Trees},
+      author={Luca Pascal Staus and Christian Komusiewicz and Frank Sommer and Manuel Sorge},
+      year={2024},
+      eprint={2412.11954},
+      archivePrefix={arXiv},
+      primaryClass={cs.DS},
+      url={https://arxiv.org/abs/2412.11954},
+      html={https://arxiv.org/abs/2412.11954},
+      abstract={Decision trees are a classic model for summarizing and classifying data. To enhance interpretability and generalization properties, it has been proposed to favor small decision trees. Accordingly, in the minimum-size decision tree training problem (MSDT), the input is a set of training examples in \mathbb{R}^d with class labels and we aim to find a decision tree that classifies all training examples correctly and has a minimum number of nodes. MSDT is NP-hard and therefore presumably not solvable in polynomial time. Nevertheless, Komusiewicz et al. [ICML '23] developed a promising algorithmic paradigm called witness trees which solves MSDT efficiently if the solution tree is small. In this work, we test this paradigm empirically. We provide an implementation, augment it with extensive heuristic improvements, and scrutinize it on standard benchmark instances. The augmentations achieve a mean 324-fold (median 84-fold) speedup over the naive implementation. Compared to the state of the art they achieve a mean 32-fold (median 7-fold) speedup over the dynamic programming based MurTree solver [Demirović et al., J. Mach. Learn. Res. '22] and a mean 61-fold (median 25-fold) speedup over SAT-based implementations [Janota and Morgado, SAT '20]. As a theoretical result we obtain an improved worst-case running-time bound for MSDT.}
+}
+
+@inproceedings{10.5555/3032027.3032040,
+author = {Saikko, Paul and Wallner, Johannes P. and J\"{a}rvisalo, Matti},
+title = {Implicit hitting set algorithms for reasoning beyond NP},
+year = {2016},
+publisher = {AAAI Press},
+abstract = {Lifting a recent proposal by Moreno-Centeno and Karp, we propose a general framework for so-called implicit hitting set algorithms for reasoning beyond NP. The framework is motivated by empirically successful specific instantiations of the approach—based on interactions between a Boolean satisfiability (SAT) solver and an integer programming (IP) solver—in the context of maximum satisfiability (MaxSAT). The framework opens up opportunities for developing implicit hitting set algorithms for various important reasoning problems in KR by implementing domain-specific reasoning modules with SAT and IP solvers. We detail instantiations of the framework for the minimum satisfiability problem— as a natural dual of MaxSAT—and, as a central KR problem, for propositional abduction, covering the second level of the polynomial hierarchy. We show empirically that an implementation of the instantiation for propositional abduction surpasses the efficiency of an approach based on encoding and solving propositional abduction instances as disjunctive logic programming under answer set semantics. We also study key properties of the general framework.},
+booktitle = {Proceedings of the Fifteenth International Conference on Principles of Knowledge Representation and Reasoning},
+pages = {104–113},
+numpages = {10},
+location = {Cape Town, South Africa},
+series = {KR'16},
+html={https://dl.acm.org/doi/10.5555/3032027.3032040}
+}
+
+@InProceedings{10.1007/978-3-642-21581-0_14,
+author="Marques-Silva, Joao
+and Lynce, Ines",
+editor="Sakallah, Karem A.
+and Simon, Laurent",
+title="On Improving MUS Extraction Algorithms",
+booktitle="Theory and Applications of Satisfiability Testing - SAT 2011",
+year="2011",
+publisher="Springer Berlin Heidelberg",
+address="Berlin, Heidelberg",
+pages="159--173",
+abstract="Minimally Unsatisfiable Subformulas (MUS) find a wide range of practical applications, including product configuration, knowledge-based validation, and hardware and software design and verification. MUSes also find application in recent Maximum Satisfiability algorithms and in CNF formula redundancy removal. Besides direct applications in Propositional Logic, algorithms for MUS extraction have been applied to more expressive logics. This paper proposes two algorithms for MUS extraction. The first algorithm is optimal in its class, meaning that it requires the smallest number of calls to a SAT solver. The second algorithm extends earlier work, but implements a number of new techniques. The resulting algorithms achieve significant performance gains with respect to state of the art MUS extraction algorithms.",
+isbn="978-3-642-21581-0",
+html="https://link.springer.com/chapter/10.1007/978-3-642-21581-0_14",
+pdf="https://satassociation.org/proceedings/SAT11/papers/SAT2011-page-156.pdf"
+}

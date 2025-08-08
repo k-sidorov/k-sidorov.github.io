@@ -7,7 +7,7 @@ categories: paper-announcement
 related_posts: false
 featured: true
 toc:
-  sidebar: left
+  sidebar: left
 ---
 
 I'm excited to share that my latest paper, “Unite and Lead: Finding Disjunctive Cliques for Scheduling Problems,” co-authored with [Imko Marijnissen](https://imkomarijnissen.com) and [Emir Demirović](https://emirdemirovic.com), has been accepted to CP 2025! For those who want all the technical details, you can read the full paper [here]({{ "/assets/pdf/cp2025-unite-and-lead.pdf" | relative_url }}). But for everyone else, I wanted to write this post to explain the core ideas in a more accessible way.

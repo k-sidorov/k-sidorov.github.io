@@ -1,0 +1,244 @@
+<style>
+  .bg-danger-mild {
+      background-color: #DE474B;
+  }
+  .bg-success-mild {
+      background-color: #138A33;
+  }
+</style>
+
+<p>
+  <a class="btn btn-primary" data-toggle="collapse" href="#ihsDemo" role="button" aria-expanded="false" aria-controls="ihsDemo" id="toggleIhsBtnTop">
+    Show the IHS knapsack explorer demo
+  </a>
+</p>
+
+<div class="collapse" id="ihsDemo">
+  <div class="card card-body">
+  <h2>Demo: IHS knapsack explorer</h2>
+  <p>Capacity: <strong id="capacity"></strong></p>
+  <div class="row">
+    <div class="col-md-6 mb-3" id="item-table"></div>
+    <div class="col-md-6 mb-3" id="conflicts"></div>
+  </div>
+  <div class="mb-3">
+    <button id="reset-button" class="btn btn-secondary">Start over</button>
+  </div>
+  <h3>Item subsets</h3>
+  <div id="conflict-picker"></div>
+  <div id="results"></div>
+  </div>
+</div>
+
+<p>
+  <a class="btn btn-primary" data-toggle="collapse" href="#ihsDemo" role="button" aria-expanded="false" aria-controls="ihsDemo" id="toggleIhsBtnBot" style="display: none">
+    Show the IHS knapsack explorer demo
+  </a>
+</p>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    var toggleBtnTop = document.getElementById("toggleIhsBtnTop");
+    var toggleBtnBot = document.getElementById("toggleIhsBtnBot");
+    var demoDiv = document.getElementById("ihsDemo");
+
+    $('#ihsDemo').on('shown.bs.collapse', function () {
+      toggleBtnTop.textContent = "Hide the IHS knapsack explorer demo";
+      toggleBtnBot.style.display = '';
+      toggleBtnBot.textContent = "Hide the IHS knapsack explorer demo";
+    });
+
+    $('#ihsDemo').on('hidden.bs.collapse', function () {
+      toggleBtnTop.textContent = "Show the IHS knapsack explorer demo";
+      toggleBtnBot.style.display = 'none';
+    });
+  });
+
+  const items = [
+      { id: 'A', weight: 3, value: 4 },
+      { id: 'B', weight: 4, value: 5 },
+      { id: 'C', weight: 2, value: 3 },
+      { id: 'D', weight: 5, value: 8 },
+  ];
+  const capacity = 6;
+  let conflicts = [];
+
+  function powerset(arr) {
+      return arr.reduce((subsets, val) =>
+          subsets.concat(subsets.map(set => [...set, val])), [[]]);
+  }
+
+  function blocker(subset) {
+      return conflicts.find(conf => conf.every(x => subset.map(i => i.id).includes(x)));
+  }
+
+  function evaluate(subset) {
+      const weight = subset.reduce((acc, x) => acc + x.weight, 0);
+      const value = subset.reduce((acc, x) => acc + x.value, 0);
+      return { weight, value, feasible: weight <= capacity, blockedBy: blocker(subset) };
+  }
+
+  function renderTable() {
+      d3.select("#capacity").text(capacity);
+      const table = d3.select("#item-table").html("").append("table").attr("class", "table table-bordered");
+      const thead = table.append("thead").append("tr");
+      thead.selectAll("th")
+          .data(["Item", "Weight", "Value"])
+          .enter().append("th")
+          .text(d => d);
+
+      const rows = table.append("tbody")
+            .selectAll("tr")
+            .data(items)
+            .enter().append("tr");
+
+      rows.append("td").text(d => d.id);
+      rows.append("td").text(d => d.weight);
+      rows.append("td").text(d => d.value);
+  }
+
+  function renderConflictPicker(subset) {
+      const picker = d3.select("#conflict-picker").html("").append("div").attr("class", "card card-body mt-4");
+      picker.append("p").text("💥 Overweight subset detected. Uncheck items to reduce weight:");
+
+      let current = [...subset];
+
+      const controls = picker.append("div").attr("class", "form-group form-check form-check-inline");
+      const checkboxes = controls.selectAll("label")
+            .data(subset)
+            .enter()
+            .append("label")
+            .attr("class", "form-check-label mr-3");
+
+      checkboxes.append("input")
+          .attr("type", "checkbox")
+          .attr("class", "form-check-input")
+          .attr("checked", true)
+          .on("change", function (event, d) {
+              if (this.checked) {
+                  current.push(d);
+              } else {
+                  current = current.filter(x => x !== d);
+              }
+              update();
+          });
+
+      checkboxes.append("span").text(d => d.id);
+
+      const info = picker.append("p").attr("id", "weight-display").attr("class", "small mt-2");
+
+      const confirm = picker.append("button")
+            .attr("id", "confirm-conflict")
+            .attr("class", "btn btn-primary btn-sm mt-2")
+            .text("Add a conflicting set of items")
+            .on("click", function () {
+                if (evaluate(current).weight > capacity) {
+                    conflicts.push(current.map(x => x.id));
+                    renderConflicts();
+                    renderResults();
+                    d3.select("#conflict-picker").html("");
+                    autoIterate();
+                }
+            });
+
+      function update() {
+          const { weight } = evaluate(current);
+          if (weight <= capacity) {
+              info.text(`Current weight: ${weight}; not overweight yet!`);
+          } else {
+              info.text(`Current weight: ${weight}`);
+          }
+          confirm.attr("disabled", weight <= capacity ? true : null);
+      }
+
+      update();
+  }
+
+  function renderConflicts() {
+      const div = d3.select("#conflicts").html("");
+      div.append("h5").text("Conflict sets of items");
+      if (conflicts.length === 0) {
+          div.append("p").attr("class", "text-muted").text("No conflicts yet.");
+          return;
+      }
+      const list = div.append("ul").attr("class", "pl-3");
+      conflicts.forEach(c => {
+          list.append("li").text(`{${c.join(', ')}}`);
+      });
+  }
+
+  function renderResults() {
+      const allSubsets = powerset(items);
+
+      const annotated = allSubsets.map(s => ({
+          subset: s,
+          ...evaluate(s)
+      }));
+      annotated.sort((a, b) => b.value - a.value);
+
+      const feasible = annotated.filter(x => x.blockedBy === undefined);
+      const optimal = feasible.reduce((best, curr) =>
+          curr.value > best.value ? curr : best, { value: -1 });
+
+      const div = d3.select("#results").html("");
+
+      if (optimal && optimal.feasible) {
+          div.append("p").attr("class", "text-success font-weight-bold mt-2").text(`🎉 Optimal subset: {${optimal.subset.map(i => i.id).join(', ')}}`);
+      } else {
+          div.append("p").attr("class", "text-danger font-weight-bold mt-2").text("⚠️ Not a feasible subset yet; please choose a conflicting set of items.");
+          renderConflictPicker(optimal.subset);
+      }
+
+      div.selectAll("div.subset")
+          .data(annotated)
+          .enter()
+          .append("div")
+          .attr("class", d => {
+              let cls = "p-2 mb-1 rounded border ";
+              if (d.blockedBy !== undefined) {
+                  cls += "bg-muted";
+                  return cls;
+              }
+              cls += "text-light ";
+              if (!d.feasible) cls += "bg-danger-mild ";
+              else cls += "bg-success-mild ";
+              if (d.value === optimal.value) {
+                  cls += " font-weight-bold";
+              }
+              return cls;
+          })
+          .attr("style", d => (d.blockedBy === undefined) ? null : "text-decoration: line-through")
+          .text(d => {
+              const label = d.subset.map(i => i.id).join(", ");
+              return `{${label}} → weight=${d.weight}, value=${d.value}`;
+          });
+
+  }
+
+  function autoIterate() {
+      const allSubsets = powerset(items);
+      const annotated = allSubsets.map(s => ({
+          subset: s,
+          ...evaluate(s)
+      }));
+      const feasible = annotated.filter(x => x.blockedBy === undefined);
+      const optimal = feasible.reduce((best, curr) =>
+          curr.value > best.value ? curr : best, { value: -1 });
+      if (!optimal.feasible) {
+          renderConflictPicker(optimal.subset);
+      }
+  }
+
+  function resetAll() {
+      conflicts = [];
+      d3.select("#conflict-picker").html("");
+      renderConflicts();
+      renderResults();
+  }
+
+  d3.select("#reset-button").on("click", resetAll);
+
+  renderTable();
+  renderConflicts();
+  renderResults();
+</script>
