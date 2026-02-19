@@ -18,8 +18,9 @@
   post_name: true
   type: MSc theses
   start: 14-11-2024
-  year: 2024
-  status: inprogress
+  year: 2025
+  status: finished
+  link: https://repository.tudelft.nl/record/uuid:2a8fa22e-654e-4c57-8b3e-12a9848e4b56
   keywords:
     - predict-and-optimize
   abstract: >
