@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Impact Explorer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@iframe-resizer/child@5.4.6"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Signika+Negative:wght@300..700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Signika Negative', sans-serif; font-weight: 300; user-select: none; }
+        .badge {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 1.6em; height: 1.6em; border-radius: 0.375rem; flex-shrink: 0;
+            color: white; font-weight: 600; font-size: 0.85rem;
+        }
+        .track {
+            position: relative; height: 2rem; background: #f3f4f6; border-radius: 0.375rem;
+            background-image: repeating-linear-gradient(to right, #e5e7eb 0, #e5e7eb 1px, transparent 1px, transparent 80px);
+        }
+        .bar {
+            position: absolute; left: 0; top: 0; height: 100%; border-radius: 0.375rem;
+            display: flex; align-items: center; justify-content: flex-end;
+            transition: width 0.05s linear;
+        }
+        .handle {
+            position: absolute; right: -6px; top: 0; height: 100%; width: 12px;
+            cursor: ew-resize; touch-action: none;
+        }
+        .handle::after {
+            content: ''; position: absolute; right: 4px; top: 25%; height: 50%; width: 4px;
+            background: rgba(0,0,0,0.25); border-radius: 2px;
+        }
+        .gauge-track { position: relative; height: 1.75rem; background: #f3f4f6; border-radius: 0.375rem; overflow: hidden; }
+        .gauge-bar { position: absolute; left: 0; top: 0; height: 100%; border-radius: 0.375rem; transition: width 0.1s ease-out; }
+        .gauge-tick {
+            position: absolute; top: 0; bottom: 0; width: 1px; background: #d1d5db;
+        }
+        .gauge-tick span {
+            position: absolute; bottom: -1.1rem; left: 0; transform: translateX(-50%);
+            font-size: 0.65rem; color: #9ca3af;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 p-4 md:p-6 text-gray-700">
+<div class="w-full max-w-3xl mx-auto bg-white p-6 rounded-xl shadow-lg">
+
+    <div class="text-center mb-5">
+        <h2 class="text-xl font-bold">Impact explorer</h2>
+        <p class="text-sm text-gray-600 mt-1">
+            Drag the right edge of a task to change its duration, and watch how the
+            lower bound on the makespan compares across the two resource constraints
+            and the inferred constraint.
+        </p>
+    </div>
+
+    <!-- Constraint banner -->
+    <div id="constraint-banner" class="mb-5 p-3 rounded-lg bg-indigo-50 border border-indigo-200 text-sm text-center font-mono"></div>
+
+    <!-- Task durations -->
+    <div class="mb-6">
+        <h3 class="font-semibold text-gray-800 mb-2">Task durations</h3>
+        <div id="tasks" class="space-y-2"></div>
+    </div>
+
+    <!-- Lower bound gauges -->
+    <div class="mb-6">
+        <h3 class="font-semibold text-gray-800 mb-2">Lower bound on the makespan</h3>
+        <div id="gauges" class="space-y-4 pb-4"></div>
+    </div>
+
+    <div class="flex justify-center">
+        <button id="reset-durations-btn" class="px-4 py-2 rounded-lg bg-gray-200 text-gray-700 text-sm font-semibold">Reset durations</button>
+    </div>
+</div>
+
+<script>
+(function () {
+    const TASKS = [
+        { id: 'a', color: '#6366f1', r1: 4, r2: 3 },
+        { id: 'b', color: '#10b981', r1: 4, r2: 3 },
+        { id: 'c', color: '#f59e0b', r1: 4, r2: 3 },
+        { id: 'd', color: '#0ea5e9', r1: 2, r2: 4 },
+        { id: 'e', color: '#a855f7', r1: 2, r2: 2 },
+    ];
+    const CAP = { r1: 10, r2: 9 };
+    const DEFAULT_DURATIONS = { a: 1, b: 1, c: 1, d: 1, e: 1 };
+    const UNIT_PX = 80;
+    const MAX_DUR = 3;
+    const STEP = 0.5;
+    const SHARED_KEY = 'cp2026-lifted-constraint';
+    const DEFAULT_CONSTRAINT = {
+        support: [{ id: 'a', coeff: 1 }, { id: 'b', coeff: 1 }, { id: 'c', coeff: 1 }, { id: 'd', coeff: 1 }],
+        k: 2,
+    };
+
+    const taskById = Object.fromEntries(TASKS.map(t => [t.id, t]));
+    const durations = Object.assign({}, DEFAULT_DURATIONS);
+
+    function readRaw() {
+        try { return localStorage.getItem(SHARED_KEY); } catch (e) { return null; }
+    }
+
+    function readConstraint() {
+        try {
+            const raw = readRaw();
+            if (raw) {
+                const obj = JSON.parse(raw);
+                if (obj && Array.isArray(obj.support) && typeof obj.k === 'number'
+                    && obj.support.every(s => taskById[s.id] && typeof s.coeff === 'number')) {
+                    return { support: obj.support, k: obj.k };
+                }
+            }
+        } catch (e) { /* ignore */ }
+        return DEFAULT_CONSTRAINT;
+    }
+
+    let constraint = readConstraint();
+    let constraintFromExplorer = !!readRaw();
+
+    function formatInequality(support, k) {
+        const terms = support.filter(s => s.coeff > 0).map(s => {
+            const coeffStr = s.coeff === 1 ? '' : s.coeff + '&middot;';
+            return `${coeffStr}x<sub style="color:${taskById[s.id].color}">${s.id}</sub>`;
+        });
+        if (terms.length === 0) return `0 &le; ${k}`;
+        return terms.join(' + ') + ` &le; ${k}`;
+    }
+
+    // ---------- task duration bars ----------
+
+    function renderTasks() {
+        const cont = document.getElementById('tasks');
+        cont.innerHTML = TASKS.map(t => `
+            <div class="flex items-center gap-3">
+                <span class="badge" style="background:${t.color}">${t.id}</span>
+                <div class="track" style="width:${MAX_DUR * UNIT_PX}px">
+                    <div class="bar" data-id="${t.id}" style="background:${t.color}; width:${Math.max(durations[t.id] * UNIT_PX, 4)}px">
+                        <div class="handle" data-id="${t.id}"></div>
+                    </div>
+                </div>
+                <span class="dur-label text-sm text-gray-500 w-10" data-id="${t.id}">${durations[t.id]}</span>
+            </div>
+        `).join('');
+
+        cont.querySelectorAll('.handle').forEach(handle => {
+            handle.addEventListener('pointerdown', onDragStart);
+        });
+    }
+
+    let drag = null;
+
+    function onDragStart(e) {
+        const id = e.currentTarget.dataset.id;
+        drag = { id, startX: e.clientX, startDur: durations[id] };
+        e.target.setPointerCapture(e.pointerId);
+        window.addEventListener('pointermove', onDragMove);
+        window.addEventListener('pointerup', onDragEnd);
+    }
+
+    function onDragMove(e) {
+        if (!drag) return;
+        const deltaUnits = (e.clientX - drag.startX) / UNIT_PX;
+        let dur = drag.startDur + deltaUnits;
+        dur = Math.round(dur / STEP) * STEP;
+        dur = Math.min(MAX_DUR, Math.max(0, dur));
+        if (dur !== durations[drag.id]) {
+            durations[drag.id] = dur;
+            updateTaskBar(drag.id);
+            renderGauges();
+        }
+    }
+
+    function onDragEnd() {
+        drag = null;
+        window.removeEventListener('pointermove', onDragMove);
+        window.removeEventListener('pointerup', onDragEnd);
+    }
+
+    function updateTaskBar(id) {
+        const bar = document.querySelector(`.bar[data-id="${id}"]`);
+        const label = document.querySelector(`.dur-label[data-id="${id}"]`);
+        bar.style.width = Math.max(durations[id] * UNIT_PX, 4) + 'px';
+        label.textContent = durations[id];
+    }
+
+    // ---------- lower-bound gauges ----------
+
+    function computeBounds() {
+        let energyR1 = 0, energyR2 = 0;
+        for (const t of TASKS) {
+            energyR1 += t.r1 * durations[t.id];
+            energyR2 += t.r2 * durations[t.id];
+        }
+        const lbR1 = energyR1 / CAP.r1;
+        const lbR2 = energyR2 / CAP.r2;
+
+        let lbLifted = null;
+        if (constraint.k > 0) {
+            let energyLifted = 0;
+            for (const s of constraint.support) {
+                energyLifted += s.coeff * (durations[s.id] || 0);
+            }
+            lbLifted = energyLifted / constraint.k;
+        }
+        return { lbR1, lbR2, lbLifted };
+    }
+
+    function renderGauges() {
+        const { lbR1, lbR2, lbLifted } = computeBounds();
+        const values = [lbR1, lbR2, lbLifted].filter(v => v !== null);
+        const scaleMax = Math.max(2.2, ...values.map(v => v * 1.05));
+
+        const rows = [
+            { label: 'R1 alone', value: lbR1, color: '#9ca3af' },
+            { label: 'R2 alone', value: lbR2, color: '#9ca3af' },
+            { label: 'inferred constraint', value: lbLifted, color: '#6366f1' },
+        ];
+
+        const ticks = [];
+        for (let i = 1; i <= Math.floor(scaleMax); i++) {
+            ticks.push(`<div class="gauge-tick" style="left:${(i / scaleMax) * 100}%"><span>${i}</span></div>`);
+        }
+
+        document.getElementById('gauges').innerHTML = rows.map(row => `
+            <div>
+                <div class="flex justify-between text-sm text-gray-600 mb-1">
+                    <span>${row.label}</span>
+                    <span class="font-mono">${row.value === null ? 'n/a' : row.value.toFixed(2)}</span>
+                </div>
+                <div class="gauge-track">
+                    ${ticks.join('')}
+                    <div class="gauge-bar" style="width:${row.value === null ? 0 : Math.min(100, (row.value / scaleMax) * 100)}%; background:${row.color}"></div>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    // ---------- constraint banner ----------
+
+    function renderBanner() {
+        const banner = document.getElementById('constraint-banner');
+        const ineq = formatInequality(constraint.support, constraint.k);
+        const note = constraintFromExplorer
+            ? 'synced with the lifting explorer above'
+            : 'default example &mdash; try the lifting explorer above to derive your own';
+        banner.innerHTML = `${ineq}<div class="text-xs text-gray-400 font-sans mt-1">${note}</div>`;
+    }
+
+    // ---------- wiring ----------
+
+    document.getElementById('reset-durations-btn').addEventListener('click', () => {
+        Object.assign(durations, DEFAULT_DURATIONS);
+        renderTasks();
+        renderGauges();
+    });
+
+    window.addEventListener('storage', e => {
+        if (e.key !== SHARED_KEY) return;
+        constraint = readConstraint();
+        constraintFromExplorer = !!readRaw();
+        renderBanner();
+        renderGauges();
+    });
+
+    renderTasks();
+    renderGauges();
+    renderBanner();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lifting Explorer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@iframe-resizer/child@5.4.6"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Signika+Negative:wght@300..700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Signika Negative', sans-serif; font-weight: 300; }
+        .badge {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 1.6em; height: 1.6em; border-radius: 0.375rem;
+            color: white; font-weight: 600; font-size: 0.85rem;
+        }
+        .task-toggle {
+            border: 2px solid transparent;
+            transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+        }
+        .task-toggle.selected {
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.25);
+        }
+        .cell-bad { color: #ef4444; font-weight: 600; }
+        .cell-good { color: #6b7280; }
+        table.reasoning td, table.reasoning th { padding: 0.25rem 0.5rem; }
+        table.reasoning tr.winner { background-color: #e0e7ff; }
+        .hint:not(.selected) { border-color: #f59e0b !important; border-style: dashed !important; }
+    </style>
+</head>
+<body class="bg-gray-50 p-4 md:p-6 text-gray-700">
+<div class="w-full max-w-3xl mx-auto bg-white p-6 rounded-xl shadow-lg">
+
+    <div class="text-center mb-5">
+        <h2 class="text-xl font-bold">Lifting explorer</h2>
+        <p class="text-sm text-gray-600 mt-1">
+            Pick a cover for one of the two resources, then lift in the remaining tasks
+            one at a time to see how the inequality grows.
+        </p>
+    </div>
+
+    <!-- Problem definition -->
+    <div class="mb-5 overflow-x-auto">
+        <table class="w-full text-sm border-collapse text-center">
+            <thead>
+                <tr class="border-b border-gray-200">
+                    <th class="text-left py-2">task</th>
+                    <th id="r1-header" class="py-2 cursor-pointer select-none"></th>
+                    <th id="r2-header" class="py-2 cursor-pointer select-none"></th>
+                </tr>
+            </thead>
+            <tbody id="problem-body"></tbody>
+        </table>
+        <p class="text-xs text-gray-400 mt-1 text-center">Click a resource header to enable / disable that constraint.</p>
+    </div>
+
+    <!-- Step 1: choose a cover -->
+    <div class="mb-5">
+        <h3 class="font-semibold text-gray-800 mb-2">Step 1 — choose a cover</h3>
+        <p class="text-sm text-gray-600 mb-2">Click tasks to add or remove them from the candidate cover.</p>
+        <div id="cover-selector" class="flex flex-wrap gap-2 mb-3"></div>
+        <div id="cover-status" class="text-sm mb-3"></div>
+        <div class="flex justify-center">
+            <button id="lock-cover-btn" class="px-4 py-2 rounded-lg bg-indigo-600 text-white text-sm font-semibold disabled:opacity-40 disabled:cursor-not-allowed">
+                Use as cover
+            </button>
+        </div>
+    </div>
+
+    <!-- Running inequality -->
+    <div id="inequality-box" class="mb-5 p-4 rounded-lg bg-indigo-50 border border-indigo-200 text-center font-mono text-lg hidden"></div>
+
+    <!-- Dare: redo with one resource -->
+    <div id="dare-box" class="mb-5 p-4 rounded-lg bg-amber-50 border border-amber-200 text-sm text-gray-700 hidden"></div>
+
+    <!-- Step 2: lifting -->
+    <div id="step2" class="mb-5 hidden">
+        <h3 class="font-semibold text-gray-800 mb-2">Step 2 — lift in another task</h3>
+        <p class="text-sm text-gray-600 mb-2">Pick which task to lift next. The reasoning for each step is shown below.</p>
+        <div id="lift-buttons" class="flex flex-wrap gap-2 mb-3"></div>
+    </div>
+
+    <!-- Reasoning log -->
+    <div id="log" class="space-y-4"></div>
+
+    <div class="flex justify-center mt-6">
+        <button id="reset-btn" class="px-4 py-2 rounded-lg bg-gray-200 text-gray-700 text-sm font-semibold">Reset</button>
+    </div>
+</div>
+
+<script>
+(function () {
+    const TASKS = [
+        { id: 'a', color: '#6366f1', r1: 4, r2: 3 },
+        { id: 'b', color: '#10b981', r1: 4, r2: 3 },
+        { id: 'c', color: '#f59e0b', r1: 4, r2: 3 },
+        { id: 'd', color: '#0ea5e9', r1: 2, r2: 4 },
+        { id: 'e', color: '#a855f7', r1: 2, r2: 2 },
+    ];
+    const CAP = { r1: 10, r2: 9 };
+    const taskById = Object.fromEntries(TASKS.map(t => [t.id, t]));
+
+    const initialState = () => ({
+        enabled: { r1: true, r2: true },
+        coverIds: [],
+        established: false,
+        k: null,
+        support: [],   // [{id, coeff}]
+        steps: [],      // log entries
+        lastRun: null, // {coverIds, liftOrder} from the previous attempt, for hints
+    });
+    let state = initialState();
+
+    function subsetsOf(arr) {
+        const n = arr.length, res = [];
+        for (let mask = 0; mask < (1 << n); mask++) {
+            const s = [];
+            for (let i = 0; i < n; i++) if (mask & (1 << i)) s.push(arr[i]);
+            res.push(s);
+        }
+        return res;
+    }
+
+    function totals(ids, extraId) {
+        const t = { r1: 0, r2: 0 };
+        for (const id of ids) { t.r1 += taskById[id].r1; t.r2 += taskById[id].r2; }
+        if (extraId) { t.r1 += taskById[extraId].r1; t.r2 += taskById[extraId].r2; }
+        return t;
+    }
+
+    function feasible(ids, extraId) {
+        const t = totals(ids, extraId);
+        for (const r of ['r1', 'r2']) {
+            if (state.enabled[r] && t[r] > CAP[r]) return false;
+        }
+        return true;
+    }
+
+    function setBadge(html, id) {
+        const t = taskById[id];
+        return `<span class="badge" style="background:${t.color}">${id}</span>`;
+    }
+
+    function fmtSet(ids) {
+        if (ids.length === 0) return '{ }';
+        return '{' + ids.map(id => `<span class="font-semibold" style="color:${taskById[id].color}">${id}</span>`).join(', ') + '}';
+    }
+
+    // ---------- rendering ----------
+
+    function renderProblem() {
+        const r1h = document.getElementById('r1-header');
+        const r2h = document.getElementById('r2-header');
+        r1h.textContent = `R1 (cap ${CAP.r1})` + (state.enabled.r1 ? '' : '  — disabled');
+        r2h.textContent = `R2 (cap ${CAP.r2})` + (state.enabled.r2 ? '' : '  — disabled');
+        r1h.className = 'py-2 cursor-pointer select-none ' + (state.enabled.r1 ? 'text-gray-700' : 'text-gray-300 line-through');
+        r2h.className = 'py-2 cursor-pointer select-none ' + (state.enabled.r2 ? 'text-gray-700' : 'text-gray-300 line-through');
+
+        const body = document.getElementById('problem-body');
+        body.innerHTML = TASKS.map(t => `
+            <tr class="border-b border-gray-100">
+                <td class="text-left py-2"><span class="badge" style="background:${t.color}">${t.id}</span></td>
+                <td class="py-2 ${state.enabled.r1 ? '' : 'text-gray-300'}">${t.r1}</td>
+                <td class="py-2 ${state.enabled.r2 ? '' : 'text-gray-300'}">${t.r2}</td>
+            </tr>
+        `).join('');
+    }
+
+    function renderCoverSelector() {
+        const sel = document.getElementById('cover-selector');
+        sel.innerHTML = TASKS.map(t => {
+            const isOn = state.coverIds.includes(t.id);
+            const isHint = !state.established && state.lastRun && state.lastRun.coverIds.includes(t.id);
+            const title = isHint ? 'title="Part of the cover you used last time"' : '';
+            return `<button data-id="${t.id}" class="task-toggle ${isOn ? 'selected' : ''} ${isHint ? 'hint' : ''} px-3 py-2 rounded-lg bg-gray-100 flex items-center gap-2 text-sm font-semibold" ${state.established ? 'disabled' : ''} ${title}>
+                        <span class="badge" style="background:${t.color}">${t.id}</span>
+                    </button>`;
+        }).join('');
+
+        if (!state.established) {
+            sel.querySelectorAll('button').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const id = btn.dataset.id;
+                    const idx = state.coverIds.indexOf(id);
+                    if (idx >= 0) state.coverIds.splice(idx, 1);
+                    else state.coverIds.push(id);
+                    render();
+                });
+            });
+        }
+
+        const status = document.getElementById('cover-status');
+        const lockBtn = document.getElementById('lock-cover-btn');
+
+        if (state.established) {
+            sel.classList.add('opacity-60');
+            status.innerHTML = '';
+            lockBtn.classList.add('hidden');
+            return;
+        }
+        sel.classList.remove('opacity-60');
+        lockBtn.classList.remove('hidden');
+
+        const C = state.coverIds;
+        if (C.length === 0) {
+            status.innerHTML = '<span class="text-gray-400">Select one or more tasks.</span>';
+            if (state.lastRun) {
+                status.innerHTML += ' <span class="text-amber-500">Dashed outline = the cover you used last time.</span>';
+            }
+            lockBtn.disabled = true;
+            return;
+        }
+
+        const t = totals(C);
+        const lines = [];
+        for (const r of ['r1', 'r2']) {
+            const over = state.enabled[r] && t[r] > CAP[r];
+            lines.push(`<span class="${over ? 'cell-bad' : 'cell-good'}">${r.toUpperCase()}: ${t[r]} / ${CAP[r]}${over ? ' — exceeds capacity' : ''}</span>`);
+        }
+        status.innerHTML = lines.join('&nbsp;&nbsp;&nbsp;');
+
+        // preview validity
+        let best = -1;
+        for (const T of subsetsOf(C)) if (feasible(T)) best = Math.max(best, T.length);
+        const valid = best < C.length;
+        lockBtn.disabled = !valid;
+        if (!valid) {
+            status.innerHTML += `<div class="text-gray-400 mt-1">All ${C.length} tasks in ${fmtSet(C)} can be active together under the enabled constraints — not a cover.</div>`;
+        } else {
+            status.innerHTML += `<div class="text-gray-500 mt-1">At most ${best} of ${C.length} can be active together &rarr; <span class="font-mono">${C.map(id => 'x<sub>' + id + '</sub>').join(' + ')} &le; ${best}</span></div>`;
+        }
+    }
+
+    function renderInequality() {
+        const box = document.getElementById('inequality-box');
+        if (!state.established) { box.classList.add('hidden'); return; }
+        box.classList.remove('hidden');
+        const terms = state.support.filter(s => s.coeff > 0).map(s => {
+            const coeffStr = s.coeff === 1 ? '' : s.coeff + '&middot;';
+            return `${coeffStr}x<sub style="color:${taskById[s.id].color}">${s.id}</sub>`;
+        });
+        const free = state.support.filter(s => s.coeff === 0).map(s => s.id);
+        let html = terms.join(' + ') + ` &le; ${state.k}`;
+        if (free.length) {
+            html += `<div class="text-xs text-gray-400 font-sans mt-2">lifted with coefficient 0 (no effect): ${free.map(id => setBadge(null, id)).join(' ')}</div>`;
+        }
+        box.innerHTML = html;
+    }
+
+    function renderLiftButtons() {
+        const step2 = document.getElementById('step2');
+        const cont = document.getElementById('lift-buttons');
+        if (!state.established) { step2.classList.add('hidden'); return; }
+        step2.classList.remove('hidden');
+        const remaining = TASKS.filter(t => !state.support.some(s => s.id === t.id));
+        if (remaining.length === 0) {
+            cont.innerHTML = '<span class="text-sm text-gray-400">All tasks have been considered.</span>';
+            return;
+        }
+        let hintId = null;
+        if (state.lastRun) {
+            const liftedSoFar = state.support.length - state.coverIds.length;
+            const candidate = state.lastRun.liftOrder[liftedSoFar];
+            if (candidate && remaining.some(t => t.id === candidate)) hintId = candidate;
+        }
+        cont.innerHTML = remaining.map(t => {
+            const isHint = t.id === hintId;
+            const title = isHint ? 'title="This is the task you lifted next last time"' : '';
+            return `<button data-id="${t.id}" class="px-3 py-2 rounded-lg bg-white border border-gray-300 hover:border-indigo-400 flex items-center gap-2 text-sm font-semibold ${isHint ? 'hint' : ''}" ${title}>
+                <span class="badge" style="background:${t.color}">${t.id}</span> lift
+            </button>`;
+        }).join('');
+        if (hintId) {
+            cont.insertAdjacentHTML('beforeend', '<div class="w-full text-xs text-amber-500 mt-1">Dashed outline = what you lifted next last time.</div>');
+        }
+        cont.querySelectorAll('button').forEach(btn => {
+            btn.addEventListener('click', () => doLift(btn.dataset.id));
+        });
+    }
+
+    function renderLog() {
+        const log = document.getElementById('log');
+        log.innerHTML = state.steps.map(renderStep).join('');
+    }
+
+    function renderStep(step) {
+        if (step.type === 'cover') {
+            return `
+                <div class="border border-gray-200 rounded-lg p-4">
+                    <div class="font-semibold text-gray-800 mb-1">Cover: ${fmtSet(step.ids)}</div>
+                    <div class="text-sm text-gray-600 mb-2">
+                        Enabled constraints: ${enabledList()}.
+                        The largest subset of ${fmtSet(step.ids)} that can be active together is
+                        ${fmtSet(step.bestSet)} (${step.bestSet.length} task${step.bestSet.length === 1 ? '' : 's'}).
+                    </div>
+                    <div class="font-mono text-sm bg-gray-50 rounded p-2 text-center">
+                        ${step.ids.map(id => 'x<sub>' + id + '</sub>').join(' + ')} &le; ${step.k}
+                    </div>
+                </div>`;
+        }
+        // lift step
+        const rows = step.table.map(row => `
+            <tr class="${row.winner ? 'winner' : ''}">
+                <td class="text-left">${fmtSet(row.T)}</td>
+                <td>${row.sum}</td>
+                <td class="${row.r1over ? 'cell-bad' : ''}">${row.r1}${state.enabled.r1 ? '' : '<span class="text-gray-300">*</span>'}</td>
+                <td class="${row.r2over ? 'cell-bad' : ''}">${row.r2}${state.enabled.r2 ? '' : '<span class="text-gray-300">*</span>'}</td>
+                <td>${row.feasible ? '&check;' : '&times;'}</td>
+            </tr>`).join('');
+
+        return `
+            <div class="border border-gray-200 rounded-lg p-4">
+                <div class="font-semibold text-gray-800 mb-1">Lifting ${setBadge(null, step.id)}</div>
+                <div class="text-sm text-gray-600 mb-2">
+                    With ${setBadge(null, step.id)} forced active, we look for the subset
+                    ${fmtSet(step.support.map(s => s.id))} (weighted by its current coefficients) that maximizes
+                    ${step.support.map(s => (s.coeff === 1 ? '' : s.coeff + '&middot;') + 'x<sub>' + s.id + '</sub>').join(' + ')}
+                    while staying feasible. This is a tiny 0/1 program &mdash;
+                    with only ${step.support.length} other tasks we can enumerate all ${1 << step.support.length} subsets.
+                </div>
+                <div class="overflow-x-auto mb-2">
+                <table class="reasoning w-full text-sm text-center border-collapse">
+                    <thead class="text-gray-500">
+                        <tr>
+                            <th class="text-left">subset T</th>
+                            <th>&Sigma; coeff.</th>
+                            <th>R1 total</th>
+                            <th>R2 total</th>
+                            <th>feasible?</th>
+                        </tr>
+                    </thead>
+                    <tbody>${rows}</tbody>
+                </table>
+                </div>
+                <div class="text-sm text-gray-600 mb-2">
+                    Best feasible subset: ${fmtSet(step.bestT)}, with &Sigma; coeff. = ${step.best}.
+                    So the lifting coefficient is
+                    &alpha; = ${step.k} &minus; ${step.best} = <span class="font-semibold">${step.alpha}</span>.
+                </div>
+                <div class="font-mono text-sm bg-gray-50 rounded p-2 text-center">
+                    ${formatInequality(step.supportAfter, step.k)}
+                </div>
+            </div>`;
+    }
+
+    function formatInequality(support, k) {
+        const terms = support.filter(s => s.coeff > 0).map(s => (s.coeff === 1 ? '' : s.coeff + '&middot;') + 'x<sub>' + s.id + '</sub>');
+        let html = terms.join(' + ') + ` &le; ${k}`;
+        const free = support.filter(s => s.coeff === 0);
+        if (free.length) html += `  <span class="text-gray-400">(+ ${free.map(s => '0&middot;x<sub>' + s.id + '</sub>').join(', ')})</span>`;
+        return html;
+    }
+
+    function enabledList() {
+        const list = [];
+        if (state.enabled.r1) list.push('R1');
+        if (state.enabled.r2) list.push('R2');
+        return list.length ? list.join(' and ') : 'none';
+    }
+
+    function sameSet(a, b) {
+        if (a.length !== b.length) return false;
+        const sa = a.slice().sort(), sb = b.slice().sort();
+        return sa.every((v, i) => v === sb[i]);
+    }
+
+    function sameSequence(a, b) {
+        return a.length === b.length && a.every((v, i) => v === b[i]);
+    }
+
+    function renderDare() {
+        const box = document.getElementById('dare-box');
+        if (!state.established || state.support.length < TASKS.length) {
+            box.classList.add('hidden');
+            return;
+        }
+        box.classList.remove('hidden');
+        const usedBoth = state.enabled.r1 && state.enabled.r2;
+        const single = state.enabled.r1 ? 'R1' : (state.enabled.r2 ? 'R2' : 'neither resource');
+
+        const liftOrder = state.support.slice(state.coverIds.length).map(s => s.id);
+        const lr = state.lastRun;
+        const samePath = lr && lr.support.length === TASKS.length
+            && sameSet(state.coverIds, lr.coverIds)
+            && sameSequence(liftOrder, lr.liftOrder);
+
+        let html;
+        if (usedBoth) {
+            html = `
+                <strong>Now try it with one resource.</strong>
+                You've used <em>both</em> R1 and R2 to reach
+                ${formatInequality(state.support, state.k)}.
+                Click R1 or R2 above to disable it, then repeat the same cover and the same lifting
+                order &mdash; the dashed outlines will remind you what you picked. Can you reach
+                the same bound using only one resource?`;
+        } else {
+            html = `
+                Using only ${single}, repeating the same cover and lifting order gives
+                ${formatInequality(state.support, state.k)}.
+                Compare this to what you got with both resources enabled &mdash; is it as strong?
+                Toggle the other resource back on to check.`;
+        }
+
+        if (samePath) {
+            const prevBoth = lr.enabled.r1 && lr.enabled.r2;
+            const prevLabel = prevBoth ? 'both resources' : (lr.enabled.r1 ? 'R1 only' : 'R2 only');
+            const curLabel = usedBoth ? 'both resources' : (state.enabled.r1 ? 'R1 only' : 'R2 only');
+            const sameBound = lr.k === state.k && JSON.stringify(state.support.map(s=>s.coeff)) === JSON.stringify(lr.support.map(s=>s.coeff));
+            html += `
+                <div class="mt-3 pt-3 border-t border-amber-200">
+                    <strong>Head-to-head &mdash; same cover, same lifting order:</strong>
+                    <table class="w-full text-sm mt-2 border-collapse">
+                        <tr>
+                            <td class="py-1 pr-3 text-gray-500 whitespace-nowrap">${prevLabel}:</td>
+                            <td class="py-1 font-mono">${formatInequality(lr.support, lr.k)}</td>
+                        </tr>
+                        <tr>
+                            <td class="py-1 pr-3 text-gray-500 whitespace-nowrap">${curLabel}:</td>
+                            <td class="py-1 font-mono">${formatInequality(state.support, state.k)}</td>
+                        </tr>
+                    </table>
+                    <div class="mt-2">
+                        ${sameBound
+                            ? 'Same inequality either way &mdash; on this path, the second resource wasn\'t actually needed.'
+                            : 'A different (and weaker) inequality &mdash; here, both resources together were doing real work.'}
+                    </div>
+                </div>`;
+        }
+
+        box.innerHTML = html;
+    }
+
+    const SHARED_KEY = 'cp2026-lifted-constraint';
+
+    function persist() {
+        if (!state.established) return;
+        try {
+            localStorage.setItem(SHARED_KEY, JSON.stringify({
+                support: state.support.map(s => ({ id: s.id, coeff: s.coeff })),
+                k: state.k,
+            }));
+        } catch (e) { /* localStorage unavailable, ignore */ }
+    }
+
+    function render() {
+        renderProblem();
+        renderCoverSelector();
+        renderInequality();
+        renderDare();
+        renderLiftButtons();
+        renderLog();
+        persist();
+    }
+
+    // ---------- actions ----------
+
+    function lockCover() {
+        const C = state.coverIds.slice();
+        let best = -1, bestSet = [];
+        for (const T of subsetsOf(C)) {
+            if (feasible(T) && T.length > best) { best = T.length; bestSet = T; }
+        }
+        state.k = best;
+        state.support = C.map(id => ({ id, coeff: 1 }));
+        state.established = true;
+        state.steps.push({ type: 'cover', ids: C, k: best, bestSet });
+        render();
+    }
+
+    function doLift(id) {
+        const support = state.support; // current support, fixed coefficients
+        const ids = support.map(s => s.id);
+        let best = -1, bestT = [];
+        const table = [];
+        for (const T of subsetsOf(ids)) {
+            const sum = T.reduce((acc, tid) => acc + support.find(s => s.id === tid).coeff, 0);
+            const tot = totals(T, id);
+            const r1over = state.enabled.r1 && tot.r1 > CAP.r1;
+            const r2over = state.enabled.r2 && tot.r2 > CAP.r2;
+            const feas = !r1over && !r2over;
+            table.push({ T, sum, r1: tot.r1, r2: tot.r2, r1over, r2over, feasible: feas, winner: false });
+            if (feas && sum > best) { best = sum; bestT = T; }
+        }
+        table.forEach(row => {
+            row.winner = row.feasible && row.sum === best && row.T.join(',') === bestT.join(',');
+        });
+        const alpha = state.k - best;
+        const supportAfter = support.concat([{ id, coeff: alpha }]);
+        state.support = supportAfter;
+        state.steps.push({ type: 'lift', id, support, table, best, bestT, alpha, k: state.k, supportAfter });
+        render();
+    }
+
+    function toggleResource(r) {
+        let lastRun = state.lastRun;
+        if (state.established) {
+            lastRun = {
+                coverIds: state.coverIds.slice(),
+                liftOrder: state.support.slice(state.coverIds.length).map(s => s.id),
+                support: state.support.map(s => ({ id: s.id, coeff: s.coeff })),
+                k: state.k,
+                enabled: { r1: state.enabled.r1, r2: state.enabled.r2 },
+            };
+        }
+        state.enabled[r] = !state.enabled[r];
+        // changing the available constraints invalidates everything downstream
+        const enabled = state.enabled;
+        const coverIds = state.coverIds;
+        state = initialState();
+        state.enabled = enabled;
+        state.coverIds = coverIds;
+        state.lastRun = lastRun;
+        render();
+    }
+
+    document.getElementById('r1-header').addEventListener('click', () => toggleResource('r1'));
+    document.getElementById('r2-header').addEventListener('click', () => toggleResource('r2'));
+    document.getElementById('lock-cover-btn').addEventListener('click', lockCover);
+    document.getElementById('reset-btn').addEventListener('click', () => { state = initialState(); render(); });
+
+    render();
+})();
+</script>
+</body>
+</html>
