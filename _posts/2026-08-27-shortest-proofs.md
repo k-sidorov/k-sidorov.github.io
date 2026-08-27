@@ -39,7 +39,7 @@ The _length_ of the proof is the number of clauses in it, and the goal of this p
 
 ## Why the length is worth caring about
 
-**Because resolution is not an arbitrary choice of proof system,** and it closely mirrors what a CDCL solver actually does. Unit propagation — the solver's workhorse inference — traced backward is_ a chain of resolution steps. So, a proof is more of an execution trace than the words “certificate” or “proof” would suggest: a short proof corresponds to a run that reached the contradiction in a few steps.
+**Because resolution is not an arbitrary choice of proof system,** and it closely mirrors what a CDCL solver actually does. For example, unit propagation — the solver's workhorse inference — traced backward is a chain of resolution steps. So, a proof is more of an execution trace than the words “certificate” or “proof” would suggest: a short proof corresponds to a run that reached the contradiction in a few steps.
 
 That makes proof length a proxy for a question that is otherwise very hard to ask: _how much room for improvement is there, on this particular formula, for this solver?_ If the solver's proof is 100 steps and the shortest possible proof is 95, the solver is essentially doing as well as its reasoning system permits, and no amount of heuristic tuning will help. If the shortest proof is 10, something is being left on the table.
 
@@ -152,4 +152,3 @@ The paper has a section on limitations, and I think it will not hurt to repeat i
 For all the limitations of this work, I think the headline result stands on its own. Solver proofs are not merely padded with unused steps — trimming already told us that. They are often _structurally_ far from optimal, sometimes by two orders of magnitude, and the shorter proof is not a tidied-up version of the long one. It is a different argument entirely. Of course, I think it would be interesting to see how to run this argument in richer proof systems — and use it to inform the design of new solver components.
 
 Thanks for reading!
-
