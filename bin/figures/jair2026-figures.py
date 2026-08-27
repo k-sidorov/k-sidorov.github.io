@@ -246,7 +246,7 @@ def fig_trim_vs_rebuild():
     x0 = 336
     b.append(f'<rect x="{x0}" y="34" width="{panel_w}" height="196" rx="10" '
              f'fill="none" stroke="{GRAY_LN}"/>')
-    b.append(label(x0 + panel_w / 2, 22, "Minimizing: reason differently", 13, INK, weight="600"))
+    b.append(label(x0 + panel_w / 2, 22, "Minimizing: think different", 13, INK, weight="600"))
     new = {"a": (x0 + 70, 66), "b": (x0 + 140, 66), "c": (x0 + 210, 66),
            "d": (x0 + 105, 120), "e": (x0 + 148, 172)}
     for (x, y) in new.values():
