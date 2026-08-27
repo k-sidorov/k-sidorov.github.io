@@ -29,5 +29,4 @@ latest_posts:
 
 Hi! 👋 I'm Konstantin, a PhD candidate at the [Algorithmics group](https://www.tudelft.nl/ewi/over-de-faculteit/afdelingen/software-technology/algorithmics/people) at TU Delft. My research interests are in the intersection of decision-making algorithms, optimization, and explainability, with a special focus on optimality proofs.
 
-In my downtime, I am also serving as a *wedstrijdleider* (tournament director) in the internal competition of *Delftse Schaakclub*; you can also check out [my reports](https://dsc.inner-join.nl/author/konstantin/) on the recent rounds of the competition.
-
+In my downtime, I am also serving as a _wedstrijdleider_ (tournament director) in the internal competition of _Delftse Schaakclub_; you can also check out [my reports](https://delftseschaakclub.nl/author/konstantin/) on the recent rounds of the competition.

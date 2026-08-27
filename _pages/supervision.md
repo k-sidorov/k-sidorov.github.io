@@ -2,14 +2,14 @@
 layout: page
 permalink: /supervision/
 title: Supervision
-description: 
+description:
 nav: true
 nav_order: 6
 ---
 
 I supervise MSc and BSc thesis projects at TU Delft in constraint programming, search methods, and combinatorial optimization, often aiming for publishable research. On this page, I explain how I work best and what you can expect from me as a supervisor; if you are a prospective student deciding whether you want to work with me, I hope you will find this page informative. Want to get a sense of my previous projects? Then [scroll down](#project-portfolio) for a list of projects I supervise or supervised.
 
-Note: I am not a *responsible professor*. I mentor day-to-day, but official decisions, including your grade or your stay in the program, will require a senior faculty member. What follows is a **written description of how I work best as a supervisor**, rather than a formal set of rules. I have found that being transparent about my style helps students know what to expect and decide whether it suits their way of working.
+Note: I am not a _responsible professor_. I mentor day-to-day, but official decisions, including your grade or your stay in the program, will require a senior faculty member. What follows is a **written description of how I work best as a supervisor**, rather than a formal set of rules. I have found that being transparent about my style helps students know what to expect and decide whether it suits their way of working.
 
 ❓ Want to address a more specific concern? Please check with [supervision FAQ](/supervision/faq).
 
@@ -32,7 +32,7 @@ By the end of a project with me, I want you to have:
 ## What I expect from you
 
 💬 **Consistent communication**, especially when stuck: remember that I can only help you if you indicate that you need help.  
-🤔 **Curiosity, independence, and collaboration**: do not expect me to provide step-by-step instructions – I value independence and critical thinking.   
+🤔 **Curiosity, independence, and collaboration**: do not expect me to provide step-by-step instructions – I value independence and critical thinking.  
 🪞 **Willingness to reflect and adjust**: any progress requires changing your behavior; if you engage openly, I’ll spend as much time as needed to help you improve.  
 🧑‍🔬 **Active participation in writing and experimenting**: I will happily help you set up, execute, and describe a convincing experiment, but if you want to learn it, you will have to do it.
 
@@ -44,7 +44,6 @@ The points above describe my supervision style in broad strokes. If you are stil
 - I will not disappear on you, block your ideas arbitrarily, or shift the goalposts.
 - I’ll be honest, constructive, and respectful – and I expect the same.
 - If we disagree, I will discuss it openly and work towards a fair solution.
-
 
 ## Project portfolio
 
@@ -93,4 +92,3 @@ The points above describe my supervision style in broad strokes. If you are stil
         </div>
     {% endfor %}
 </div>
-

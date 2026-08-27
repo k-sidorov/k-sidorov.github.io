@@ -18,9 +18,12 @@
   URN =		{urn:nbn:de:0030-drops-266837},
   doi =		{10.4230/LIPIcs.CP.2026.50},
   annote =	{Keywords: Constraint programming, scheduling, cumulative, lifting, valid inequalities},
+  abstract = {Cumulative constraints are central in scheduling with constraint programming, yet propagation is typically performed per constraint, missing multi-resource interactions and causing severe slowdowns on some benchmarks. I present a preprocessing method for inferring additional cumulative constraints that capture such interactions without search-time probing.
+This approach interprets cumulative constraints as linear inequalities over occupancy vectors and generates valid inequalities by (i) discovering covers, the sets of tasks that cannot run in parallel, (ii) strengthening the cover inequalities for the discovered sets with lifting, and (iii) injecting the resulting constraints back into the scheduling problem instance. Experiments on standard RCPSP and RCPSP/max test suites show that these inferred constraints improve search performance and tighten objective bounds on favorable instances, while exhibiting more stable performance on unfavorable instances than the prior work. Additionally, these experiments discover 25 new lower bounds and five new best solutions; seven of the lower bounds are obtained directly from the inferred constraints.},
   pdf = {https://drops.dagstuhl.de/storage/00lipics/lipics-vol379-cp2026/LIPIcs.CP.2026.50/LIPIcs.CP.2026.50.pdf},
   code = {https://github.com/k-sidorov/cumulative-lifting},
-  slides = {talks/cp26-cumulative}
+  slides = {talks/cp26-cumulative},
+  blog = {/blog/2026/cp2026-lifting/}
 }
 
 @InProceedings{sidorov_et_al:LIPIcs.CP.2025.35,
@@ -46,7 +49,8 @@
   abstract = {Constraint programming solvers have seen much success in scheduling problems owing to their efficient reasoning over constraints to solve complex problems in practice. Many algorithms have been proposed for propagating information from a single constraint. However, inferring and exchanging information across multiple constraints can provide deeper insight into the global structure of a problem. In this work, we propose to exchange information amongst constraints by inferring the disjointness of tasks in scheduling problems from many constraints. We do this by (i) augmenting existing propagators, such as the Cumulative and nogoods, to report when pairs of tasks are disjoint, and (ii) leveraging this information by introducing the SelectiveDisjunctive propagator which generates a lower bound on the earliest completion time of cliques of disjoint tasks to determine conflicts. This allows us to aggregate disjointness information spanning multiple constraints to gain a better global overview of the problem, as well as more precise local information. We also identify a problem structure where an LCG solver reasoning over Cumulative constraints separately, without any reformulations, requires an exponential amount of time to prove infeasibility, which we both justify theoretically and show empirically; on the other hand, our approach solves those instances in polynomial time. On particular known RCPSP and RCPSP/max benchmarks, our approach significantly reduces the number of conflicts required to prove optimality when resource contention is high. Additionally, we discover new lower bounds for 16 RCPSP/max instances (closing six of them) and four RCPSP instances (closing one), as well as new upper bounds for two RCPSP/max instances and four RCPSP instances. Furthermore, we empirically analyse our proposed approach to determine which features are beneficial for performance, showing that finding cliques is one of the main bottlenecks and that detecting disjointness during search can lead to improved bounds on certain instances, but it generally negatively impacts learning. This work paves the way for reasoning over the disjointness of tasks inferred from a variety of standard constraints to discover novel information sourced from multiple constraints during search.},
   pdf = {cp2025-unite-and-lead.pdf},
   code = {https://zenodo.org/records/15624366},
-  dataset = {https://zenodo.org/records/15624416}
+  dataset = {https://zenodo.org/records/15624416},
+  blog = {/blog/2025/unite-and-lead/}
 }
 
 @InProceedings{demirovic_et_al:LIPIcs.CP.2024.9,
@@ -66,6 +70,7 @@
   URL =		{https://drops.dagstuhl.de/entities/document/10.4230/LIPIcs.CP.2024.9},
   URN =		{urn:nbn:de:0030-drops-206948},
   doi =		{10.4230/LIPIcs.CP.2024.9},
+  abstract = {Pseudo-Boolean proof logging has been used successfully to provide certificates of optimality from a variety of constraint- and satisifability-style solvers that combine reasoning with a backtracking or clause-learning search. Another paradigm, occurring in dynamic programming and decision diagram solving, instead reasons about partial states and possible transitions between them. We describe a framework for generating clean and efficient pseudo-Boolean proofs for these kinds of algorithm, and use it to produce certifying algorithms for knapsack, longest path, and interval scheduling. Because we use a common proof system, we can also reason about hybrid solving algorithms: we demonstrate this by providing proof logging for a dynamic programming based knapsack propagator inside a constraint programming solver.},
   html = {https://drops.dagstuhl.de/entities/document/10.4230/LIPIcs.CP.2024.9},
   pdf = {LIPIcs.CP.2024.9.pdf},
   annote =	{Keywords: Proof logging, dynamic programming, decision diagrams}
@@ -88,53 +93,72 @@
   URL =		{https://drops.dagstuhl.de/entities/document/10.4230/LIPIcs.CP.2024.11},
   URN =		{urn:nbn:de:0030-drops-206969},
   doi =		{10.4230/LIPIcs.CP.2024.11},
+  abstract = {Proof logging is used to increase trust in the optimality and unsatisfiability claims of solvers. However, to this date, no constraint programming solver can practically produce proofs without significantly impacting performance, which hinders mainstream adoption. We address this issue by introducing a novel proof generation framework, together with a CP proof format and proof checker. Our approach is to divide the proof generation into three steps. At runtime, we require the CP solver to only produce a proof sketch, which we call a scaffold. After the solving is done, our proof processor trims and expands the scaffold into a full CP proof, which is subsequently verified. Our framework is agnostic to the solver and the verification approach. Through MiniZinc benchmarks, we demonstrate that with our framework, the overhead of logging during solving is often less than 10\%, significantly lower than other approaches, and that our proof processing step can reduce the overall size of the proof by orders of magnitude and by extension the proof checking time. Our results demonstrate that proof logging has the potential to become an integral part of the CP community.},
   html = {https://drops.dagstuhl.de/entities/document/10.4230/LIPIcs.CP.2024.11},
   pdf = {LIPIcs.CP.2024.11.pdf},
   annote =	{Keywords: proof logging, formal verification, constraint programming}
 }
 
-@ARTICLE{Sidorov2024-Other-01,
+@ARTICLE{Sidorov2026-ek,
   selected={true},
-  abbr={arXiv},
-  title    = "How To Discover Short, Shorter, and the Shortest Proofs of
-              Unsatisfiability: A Branch-and-Bound Approach for Resolution Proof
-              Length Minimization",
-  author   = "Sidorov, Konstantin and van der Linden, Koos and Correia,
-              Gon\c{c}alo Homem de Almeida and de Weerdt, Mathijs and
-              Demirovi\'{c}, Emir",
-  abstract = "Modern software for propositional satisfiability problems gives a
-              powerful automated reasoning toolkit, capable of outputting not
-              only a satisfiable/unsatisfiable signal but also a justification
-              of unsatisfiability in the form of resolution proof (or a more
-              expressive proof), which is commonly used for verification
-              purposes. Empirically, modern SAT solvers produce relatively short
-              proofs, however, there are no inherent guarantees that these
-              proofs cannot be significantly reduced. This paper proposes a
-              novel branch-and-bound algorithm for finding the shortest
-              resolution proofs; to this end, we introduce a layer list
-              representation of proofs that groups clauses by their level of
-              indirection. As we show, this representation breaks all
-              permutational symmetries, thereby improving upon the
-              state-of-the-art symmetry-breaking and informing the design of a
-              novel workflow for proof minimization. In addition to that, we
-              design pruning procedures that reason on proof length lower bound,
-              clause subsumption, and dominance. Our experiments suggest that
-              the proofs from state-of-the-art solvers could be shortened by
-              30-60\% on the instances from SAT Competition 2002 and by 25-50\%
-              on small synthetic formulas. When treated as an algorithm for
-              finding the shortest proof, our approach solves twice as many
-              instances as the previous work based on SAT solving and reduces
-              the time to optimality by orders of magnitude for the instances
-              solved by both approaches.",
-  year     =  2024,
-  keywords = "Proof minimization;Branch-and-bound;Symmetry breaking;Dominance
-              pruning;MUS;Propositional satisfiability",
-  html = {https://arxiv.org/abs/2411.07955},
-  pdf = {https://arxiv.org/pdf/2411.07955},
+  abbr={JAIR},
+  html = {https://jair.org/index.php/jair/article/view/22128},
+  pdf = {https://jair.org/index.php/jair/article/view/22128/27359},
   poster = {Proof minimization CP24.pdf},
-  code = {https://zenodo.org/records/14051922},
-  dataset = {https://zenodo.org/records/14052283}
+  code = {https://zenodo.org/records/18852372},
+  dataset = {https://zenodo.org/records/18851925},
+  blog = {/blog/2026/shortest-proofs/},
+  title     = "How to discover short, shorter, and the shortest proofs of
+               unsatisfiability: A branch-and-bound approach for resolution
+               proof length minimization",
+  author    = "Sidorov, Konstantin and {van der Linden}, Koos and Correia, Gon{\c
+               c}alo Homem de Almeida and De Weerdt, Mathijs and Demirovi{\'c},
+               Emir",
+  abstract  = "Background: Modern SAT solvers are indispensable reasoning tools
+               that are widely applied in verification, planning, and
+               combinatorial design. Beyond answering satisfiability, they also
+               produce unsatisfiability proofs, which are valuable for
+               certification and analysis. Since there are no guarantees that
+               their length is close to optimal, however, those proofs are
+               insufficient to make claims about the gap between the solver
+               proofs and the shortest possible proof. Understanding this gap
+               is important for analyzing solver behavior, as it can be seen as
+               a proxy for evaluating the room for improvement of the solver
+               for the input formula in question. Objectives: We study the
+               problem of finding the shortest resolution proofs for
+               unsatisfiable formulas. Our goal is to understand how far
+               solver-generated proofs deviate from the optimum, and to develop
+               algorithms that can discover proofs substantially shorter than
+               the solver-produced proofs. Methods: We propose a novel
+               branch-and-bound algorithm for resolution proof length
+               minimization. To facilitate it, we introduce a layer list
+               representation that eliminates all symmetries from clause
+               permutations, thereby improving upon an earlier SAT-encoding
+               approach to proof length minimization. Further, we accelerate
+               the search by integrating pruning techniques based on proof
+               length lower bounds and clause subsumption. Results: Our
+               algorithm consistently reduces solver proof lengths by 25--50\%
+               for synthetic instances and by 15---50\% for formulas from the
+               SAT Competition editions from 2002 to 2025, as well as halves
+               the proof lengths for half of the available formulas from
+               planning problems. As an exact method, it solves twice as many
+               minimally unsatisfiable instances as the state-of-the-art
+               approach and is faster by orders of magnitude on the overlapping
+               instances. Conclusions: These results show that solver-generated
+               proofs can often be substantially shortened---not by removing
+               redundant claims, but by an entirely different chain of
+               derivations---and that resolution proof length minimization is
+               more tractable in practice than earlier approaches suggested.
+               Our work highlights proof length minimization as a useful
+               perspective for analyzing solver behavior and opens avenues for
+               applying similar techniques to stronger proof systems.",
+  journal   = "J. Artif. Intell. Res.",
+  publisher = "AI Access Foundation",
+  volume    =  86,
+  month     =  aug,
+  year      =  2026
 }
+
 
 
 @article{Sidorov_Correia_deWeerdt_Demirović_2024,
@@ -146,7 +170,7 @@
   abstractNote={People want to rely on optimization algorithms for complex decisions but verifying the optimality of the solutions can then become a valid concern, particularly for critical decisions taken by non-experts in optimization. One example is the shortest-path problem on a network, occurring in many contexts from transportation to logistics to telecommunications. While the standard shortest-path problem is both solvable in polynomial time and certifiable by duality, introducing side constraints makes solving and certifying the solutions much harder. We propose a proof system for constrained shortest-path problems, which gives a set of logical rules to derive new facts about feasible solutions. The key trait of the proposed proof system is that it specifically includes high-level graph concepts within its reasoning steps (such as connectivity or path structure), in contrast to, e.g., using linear combinations of model constraints. Thus, using our proof system, we can provide a step-by-step, human-auditable explanation showing that the path given by an external solver cannot be improved. Additionally, to maximize the advantages of this setup, we propose a proof search procedure that specifically aims to find small proofs of this form using a procedure similar to A* search. We evaluate our proof system on constrained shortest path instances generated from real-world road networks and experimentally show that we may indeed derive more interpretable proofs compared to an integer programming approach, in some cases leading to much smaller proofs.},
   number={18},
   journal={Proceedings of the AAAI Conference on Artificial Intelligence},
-  author={Sidorov, Konstantin and Correia, Gonçalo Homem de Almeida and De Weerdt, Mathijs and Demirović, Emir},
+  author={Sidorov, Konstantin and Correia, Gonçalo Homem de Almeida and {de Weerdt}, Mathijs and Demirović, Emir},
   year={2024},
   month={Mar.},
   pages={20794-20802},
