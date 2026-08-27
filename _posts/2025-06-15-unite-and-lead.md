@@ -5,7 +5,7 @@ description: An overview of the scheduling technique explored by us in our CP 20
 tags: cp scheduling
 categories: paper-announcement
 related_posts: false
-featured: true
+# featured: true
 toc:
   sidebar: left
 ---
@@ -26,9 +26,10 @@ In a way, it's like trying to solve a Sudoku puzzle by only ever looking at one 
 
 To see how the local view can fail, consider a small puzzle; in our work, we call it the _3n problem_. Let's say you have six tasks. Each requires a different mix of three resources. Your job is to schedule them. Try it for yourself below! You can drag the tasks onto the timeline. **Can you schedule any two tasks at the same time?**
 
-<iframe class="iframe-resize" src="{{ '/assets/html/cp2025-3n.html' | relative_url }}" frameborder='0' scrolling='no'></iframe>
+<iframe class="iframe-resize" src="{{ '/assets/html/cp2025-3n.html' | relative_url }}" frameborder='0'></iframe>
 
 As you surely discovered by this point, you can't. Any pair of tasks you choose will overload one of the resources. For example:
+
 - Two yellow tasks conflict on Resource 1.
 - A yellow and a green task conflict on Resource 1.
 - A yellow and a blue task conflict on Resource 2.
@@ -36,6 +37,7 @@ As you surely discovered by this point, you can't. Any pair of tasks you choose 
 …and so on.
 
 Every single pair of tasks is **disjoint**—they cannot overlap in time. The only solution is to schedule all six tasks sequentially, one after the other. This seems obvious when you look at the whole picture. But for a standard constraint solver, it's surprisingly tricky:
+
 - The solver checks the “Resource 1” constraint and sees _some_ pairs of tasks in conflict.
 - Then it checks the “Resource 2” and finds _some other_ conflicting pairs.
 
@@ -57,7 +59,7 @@ The detective's job is to look for cliques in this graph: groups of tasks where 
 
 Here's an interactive visualization of that process. Each node corresponds to a task that takes a single time unit; the numbers in the node give a time interval available for a task: 1..6 means that a task starts at time 1 or later and finishes at time 6 or earlier. Click the toggles to apply different resource constraints. As you do, you'll see the “disjointness” edges appear. Watch what happens when a clique forms!
 
-<iframe class="iframe-resize" src="{{ '/assets/html/cp2025-clique.html' | relative_url }}" frameborder='0' scrolling='no'></iframe>
+<iframe class="iframe-resize" src="{{ '/assets/html/cp2025-clique.html' | relative_url }}" frameborder='0'></iframe>
 
 This ability to find conflicting cliques by combining information from many different constraints is the superpower of our new approach. It gives the solver a global perspective that it was previously lacking.
 
@@ -68,6 +70,7 @@ In a word: **yes**!
 When we tested our approach on the 3n puzzle that stumped other solvers, ours solved it instantly, and for much larger versions at that. More importantly, when we applied it to well-known, difficult scheduling benchmarks from the research community, we saw some major improvements. On problems with high _resource contention_—meaning resources are scarce and tasks are constantly competing—our approach sometimes improved the solver's speed by **orders of magnitude**. (That means instead of taking hours, it took minutes or even seconds!)
 
 We were also thrilled to discover **new state-of-the-art bounds** for a handful of problems that have been studied by researchers for years. We managed to:
+
 - discover the best-known solutions for two RCPSP/max and four RCPSP instances,
 - improve the lower bounds on the achievable objective value for sixteen RCPSP/max and four RCPSP instances,
 - and completely solve seven instances that were previously open along the way.
@@ -76,7 +79,6 @@ For us, it's like finding a new, faster route through a well-trodden maze.
 
 ## The takeaways
 
-The big lesson from our work is that for complex problems, looking at the pieces in isolation isn't enough. By developing ways for the solver to unite information from many sources and reason about the global structure of the problem, we can achieve breakthroughs that were previously out of reach. 
+The big lesson from our work is that for complex problems, looking at the pieces in isolation isn't enough. By developing ways for the solver to unite information from many sources and reason about the global structure of the problem, we can achieve breakthroughs that were previously out of reach.
 
 There's still a lot more to explore, but we're excited about this new direction for building smarter and more powerful constraint solvers. Thanks for reading!
-

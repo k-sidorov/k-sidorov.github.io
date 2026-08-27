@@ -3,7 +3,7 @@
     "name": "Konstantin Sidorov",
     "label": "PhD Candidate",
     "email": "k.sidorov@tudelft.nl",
-    "url": "https://ksidorov.nl"
+    "url": "https://www.ksidorov.com"
   },
   "work": [
     {
@@ -14,19 +14,19 @@
       "startDate": "2023-01-01",
       "summary": "Researching how optimization solvers justify their answers, and how they can be made to reason about the global structure of a problem instead of one constraint at a time.",
       "highlights": [
-        "Developed a branch-and-bound method for finding the shortest resolution proofs of unsatisfiability, built on a layer list representation of proofs that breaks the permutational symmetry earlier encodings had to search through. It proves optimality on twice as many instances as the previous SAT-encoding approach, and used as an anytime method it shortens already-trimmed solver proofs by 15-50% — by a factor of 163 on the largest case, a multi-robot path planning formula.",
-        "Showed that shorter proofs are not tidied-up versions of long ones: across the SAT Competition benchmarks, proofs that trim well almost never shrink further, and proofs that shrink well almost never trimmed well. Solver proofs are structurally far from optimal, not merely padded with unused steps.",
-        "Introduced a preprocessing method that infers new Cumulative constraints for scheduling problems by reading such constraints as linear inequalities, discovering covers of tasks that cannot run in parallel, and strengthening them by lifting. It captures multi-resource interactions that per-resource propagation misses, and found 25 new lower bounds and five new best solutions on standard RCPSP benchmarks.",
-        "Designed, with colleagues, a propagator that aggregates disjointness information across several constraints to find cliques of mutually disjoint tasks — closing instances that a solver reasoning over each Cumulative constraint separately provably needs exponential time to refute.",
+        "Developed a branch-and-bound method for finding the shortest resolution proofs of unsatisfiability, and showed that shorter proofs are not tidied-up versions of long ones: across the SAT Competition benchmarks, proofs that trim well almost never shrink further, and proofs that shrink well almost never trimmed well.",
+        "Introduced a preprocessing method that infers new Cumulative constraints for scheduling problems by reading such constraints as linear inequalities, discovering covers of tasks that cannot run in parallel, and strengthening them by lifting. This approach found 25 new lower bounds and five new best solutions on standard RCPSP benchmarks.",
+        "Designed a propagator that aggregates disjointness information across several constraints to find cliques of mutually disjoint tasks — closing instances that a solver reasoning over each Cumulative constraint separately provably needs exponential time to refute.",
         "Contributed to the proof logging toolchain for constraint programming: a multi-stage framework that keeps the runtime cost of emitting certificates typically below 10%, pseudo-Boolean reasoning that certifies dynamic programming and decision diagram algorithms, and a human-auditable proof system for constrained shortest paths.",
-        "Supervise MSc and BSc thesis projects in constraint programming, search methods, and combinatorial optimization, aiming for publishable research.",
+        "Supervised MSc and BSc thesis projects in constraint programming, search methods, and combinatorial optimization, aiming for publishable research.",
         "Organized a research seminar about combinatorial optimization."
       ]
     },
     {
       "name": "X5 Group",
       "location": "Moscow, Russia",
-      "position": "Senior Data Sceintist",
+      "position": "Senior Data Scientist",
+      "url": "https://www.x5.ru/",
       "startDate": "2021-11-29",
       "endDate": "2022-12-31",
       "summary": "Participated in the development of the analytics platform for the transport division of X5 Group, the largest Russian retailer.",
@@ -76,6 +76,7 @@
     },
     {
       "institution": "Astrakhan State University",
+      "url": "http://asu-edu.ru/",
       "location": "Astrakhan, Russia",
       "studyType": "Bachelor's degree, Software Engineering",
       "startDate": "2016-09-01",
