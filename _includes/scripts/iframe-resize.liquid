@@ -1,11 +1,32 @@
 <script src="https://cdn.jsdelivr.net/npm/@iframe-resizer/parent@5.4.6"></script>
 <script>
-  iframeResize(
-    {
-      license: 'GPLv3',
-      log: 'collapsed',
-      waitForLoad: true,
-    },
-    '.iframe-resize'
-  );
+  // al-folio v1 loads a larger script bundle before this include, so by the time
+  // iframeResize() runs the embedded demos have often already fired `load`. With
+  // `waitForLoad: true` the parent then waits for an event that never comes, never
+  // sizes the iframe, and — because it still sets `overflow: hidden` inline — the
+  // demo is silently cut off at its fallback height. Initialise once the document
+  // is complete instead, so every iframe is present and the parent can message it
+  // straight away.
+  (function () {
+    function initIframeResize() {
+      iframeResize(
+        {
+          license: 'GPLv3',
+          log: 'collapsed',
+          waitForLoad: false,
+          // Default (false) forces `overflow: hidden` and `scrolling="no"` onto the
+          // iframe, which clips a demo capped by CSS. 'omit' leaves the attribute
+          // alone and sets `overflow: auto`, so a capped demo scrolls internally.
+          scrolling: 'omit',
+        },
+        '.iframe-resize'
+      );
+    }
+
+    if (document.readyState === 'complete') {
+      initIframeResize();
+    } else {
+      window.addEventListener('load', initIframeResize, { once: true });
+    }
+  })();
 </script>

@@ -64,3 +64,37 @@ iframe {
   width: 100%;
   height: 100vh;
 }
+
+// iframe-resizer grows these to their full content height and sets `overflow:
+// hidden` inline. Left alone, a demo whose walkthrough runs long either pushes
+// the rest of the post far down the page, or — if the resizer misses its init —
+// is clipped with no way to reach the rest. Capping the height and forcing the
+// scrollbar back on gives the demo an internal scrollbar once it outgrows the
+// viewport, and keeps the content reachable either way.
+iframe.iframe-resize {
+  max-height: 90vh;
+}
+
+// Table of contents -----------------------------------------------------------
+// tocbot's stylesheet puts `overflow-y: auto` on the `.toc` container. With no
+// max-height the container is already as tall as its contents, so the only thing
+// that produces is a scrollbar off a sub-pixel rounding difference. The sidebar
+// is sticky and short; let it lay out at its natural height.
+
+#toc-sidebar.toc {
+  overflow-y: visible;
+}
+
+// CV --------------------------------------------------------------------------
+// Tailwind runs with `preflight: false`, so there is no global list reset, and
+// al_folio_cv only styles `div.list-group` — the CV renders `ul.list-group`,
+// which therefore falls back to browser default markers and indentation.
+
+.cv ul.list-group,
+ul.list-group.list-group-flush {
+  display: flex;
+  flex-direction: column;
+  padding-left: 0;
+  margin-bottom: 0;
+  list-style: none;
+}
