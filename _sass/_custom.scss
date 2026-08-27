@@ -90,6 +90,16 @@ iframe.iframe-resize {
 // al_folio_cv only styles `div.list-group` — the CV renders `ul.list-group`,
 // which therefore falls back to browser default markers and indentation.
 
+// al_folio_cv marks the CV body copy `card-text font-weight-light`, but v1's
+// `.card-text` component sets `font-weight: 400` and, defined later in the Tailwind
+// bundle, beats the utility class at equal specificity — so bullets and summaries
+// render heavier than the rest of the page. Give the utility back its meaning; it is
+// only used where the markup explicitly asks for light text.
+
+.font-weight-light {
+  font-weight: 300;
+}
+
 .cv ul.list-group,
 ul.list-group.list-group-flush {
   display: flex;

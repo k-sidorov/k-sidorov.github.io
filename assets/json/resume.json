@@ -7,14 +7,19 @@
   },
   "work": [
     {
-      "name": "Delft University of Technology",
+      "name": "Algorithmics group, EEMCS, TU Delft",
       "location": "Delft, Netherlands",
       "position": "PhD Candidate",
       "url": "https://www.tudelft.nl/en/eemcs/the-faculty/departments/software-technology/algorithmics",
       "startDate": "2023-01-01",
-      "summary": "Worked on proof-logging-related techniques in ConSol research group.",
+      "summary": "Researching how optimization solvers justify their answers, and how they can be made to reason about the global structure of a problem instead of one constraint at a time.",
       "highlights": [
-        "Designed a methodology for reducing the length of optimality proofs.",
+        "Developed a branch-and-bound method for finding the shortest resolution proofs of unsatisfiability, built on a layer list representation of proofs that breaks the permutational symmetry earlier encodings had to search through. It proves optimality on twice as many instances as the previous SAT-encoding approach, and used as an anytime method it shortens already-trimmed solver proofs by 15-50% — by a factor of 163 on the largest case, a multi-robot path planning formula.",
+        "Showed that shorter proofs are not tidied-up versions of long ones: across the SAT Competition benchmarks, proofs that trim well almost never shrink further, and proofs that shrink well almost never trimmed well. Solver proofs are structurally far from optimal, not merely padded with unused steps.",
+        "Introduced a preprocessing method that infers new Cumulative constraints for scheduling problems by reading such constraints as linear inequalities, discovering covers of tasks that cannot run in parallel, and strengthening them by lifting. It captures multi-resource interactions that per-resource propagation misses, and found 25 new lower bounds and five new best solutions on standard RCPSP benchmarks.",
+        "Designed, with colleagues, a propagator that aggregates disjointness information across several constraints to find cliques of mutually disjoint tasks — closing instances that a solver reasoning over each Cumulative constraint separately provably needs exponential time to refute.",
+        "Contributed to the proof logging toolchain for constraint programming: a multi-stage framework that keeps the runtime cost of emitting certificates typically below 10%, pseudo-Boolean reasoning that certifies dynamic programming and decision diagram algorithms, and a human-auditable proof system for constrained shortest paths.",
+        "Supervise MSc and BSc thesis projects in constraint programming, search methods, and combinatorial optimization, aiming for publishable research.",
         "Organized a research seminar about combinatorial optimization."
       ]
     },
@@ -57,9 +62,7 @@
       "startDate": "2020-10-01",
       "endDate": "2022-07-01",
       "score": "4.81 / 5.00, <strong>with distinction</strong>",
-      "courses": [
-        "Random Graphs", "Additive Combinatorics", "Analytic Combinatorics"
-      ]
+      "courses": ["Random Graphs", "Additive Combinatorics", "Analytic Combinatorics"]
     },
     {
       "url": "https://dataschool.yandex.com/",
@@ -69,9 +72,7 @@
       "startDate": "2017-09-01",
       "endDate": "2019-06-25",
       "score": "4.92 / 5.00",
-      "courses": [
-        "Convex Optimization", "Bayesian Methods in Machine Learning", "Advanced Deep Learning"
-      ]
+      "courses": ["Convex Optimization", "Bayesian Methods in Machine Learning", "Advanced Deep Learning"]
     },
     {
       "institution": "Astrakhan State University",
@@ -105,22 +106,19 @@
   ],
   "interests": [
     {
-      "name": "Combinatorial optimization",
+      "name": "Optimality and unsatisfiability proofs",
       "icon": "fa-solid fa-tag",
-      "keywords": [
-        "Mixed-integer programming",
-        "Propositional satisfiability",
-        "Branch-and-bound search"
-      ]
+      "keywords": ["Proof logging", "Proof minimization", "Resolution", "Pseudo-Boolean reasoning"]
     },
     {
-      "name": "Optimality proofs",
+      "name": "Constraint programming for scheduling",
       "icon": "fa-solid fa-tag",
-      "keywords": [
-        "Proof logging",
-        "VeriPB",
-        "Clausal proofs"
-      ]
+      "keywords": ["Cumulative constraints", "Valid inequalities and lifting", "Multi-resource reasoning"]
+    },
+    {
+      "name": "Search and inference",
+      "icon": "fa-solid fa-tag",
+      "keywords": ["Branch-and-bound search", "Symmetry breaking", "Propositional satisfiability"]
     }
   ]
 }
