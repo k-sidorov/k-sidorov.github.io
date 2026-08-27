@@ -1,0 +1,66 @@
+/*******************************************************************************
+ * Site-specific styles for ksidorov.com.
+ *
+ * Everything else is gem-owned (al_folio_core). Keep this file limited to
+ * deliberate deviations from the theme so upgrades stay cheap.
+ ******************************************************************************/
+
+// Typography ------------------------------------------------------------------
+// Signika Negative replaces al-folio's default Roboto. The font itself is pulled
+// in via `third_party_libraries.google_fonts.url.fonts` in _config.yml.
+
+$site-font-family:
+  "Signika Negative",
+  system-ui,
+  -apple-system,
+  "Segoe UI",
+  Roboto,
+  "Helvetica Neue",
+  "Noto Sans",
+  "Liberation Sans",
+  Arial,
+  sans-serif,
+  "Apple Color Emoji",
+  "Segoe UI Emoji",
+  "Segoe UI Symbol",
+  "Noto Color Emoji";
+
+body {
+  font-family: $site-font-family;
+  font-optical-sizing: auto;
+  font-weight: 300;
+  font-style: normal;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: $site-font-family;
+}
+
+// Profile card ----------------------------------------------------------------
+// The theme sets the whole `.more-info` block in monospace; here only the address
+// lines themselves are monospaced, so surrounding markup keeps the site font.
+
+.profile {
+  .more-info {
+    font-family: $site-font-family;
+
+    p {
+      font-family: monospace;
+    }
+  }
+}
+
+// Embedded interactive demos --------------------------------------------------
+// Posts embed self-contained visualisations from assets/html/ in an iframe; they
+// size themselves through _includes/scripts/iframe-resize.liquid, and default to
+// filling the viewport before that script runs.
+
+iframe {
+  width: 100%;
+  height: 100vh;
+}

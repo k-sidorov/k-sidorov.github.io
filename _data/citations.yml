@@ -1,0 +1,6 @@
+# Citation counts, refreshed by the `update-citations` workflow / al_citations.
+# Starts empty: the al-folio starter ships the theme demo's data, which is keyed by
+# a different Google Scholar profile and does not apply to this site.
+metadata:
+  last_updated:
+papers: {}

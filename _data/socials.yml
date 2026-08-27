@@ -1,0 +1,15 @@
+# this file contains the social media links and usernames of the author
+# the socials will be displayed in the order they are defined here
+# for more information, please refer to the documentation of jekyll-socials plugin: https://github.com/george-gca/jekyll-socials
+cv_pdf: /assets/pdf/cv.pdf # path to your CV PDF file
+email: k.sidorov@tudelft.nl # your email address
+github_username: k-sidorov # your GitHub user name
+linkedin_username: konstantin-sidorov-096b54281 # your LinkedIn user name
+orcid_id: 0009-0009-0655-4200 # your ORCID ID
+scholar_userid: nK-0kJ0AAAAJ # your Google Scholar ID
+# the RSS icon points at the news feed; jekyll-socials hardwires the built-in
+# `rss_icon` entry to /feed.xml, so this is declared as a custom social instead.
+news_rss:
+  logo: fa-solid fa-square-rss
+  title: RSS Feed
+  url: /feed/news.xml
